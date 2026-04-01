@@ -1,42 +1,39 @@
 package com.javainternshiporderservice.repository;
 
+import com.javainternshiporderservice.model.OrderItem;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import com.javainternshiporderservice.model.OrderItem;
-import java.util.UUID;
-import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Repository
 public interface OrderItemRepository extends
                                 JpaRepository<OrderItem, UUID>,
                                 JpaSpecificationExecutor<OrderItem> {
 
-@EntityGraph(attributePaths = {"order", "item"})
-Optional<OrderItem> findById(UUID id);
+    @EntityGraph(attributePaths = {"order", "item"})
+    @Override
+    Optional<OrderItem> findById(UUID id);
 
-@EntityGraph(attributePaths = {"order", "item"})
-List<OrderItem> findByOrderId(UUID orderId);
+    @EntityGraph(attributePaths = {"order", "item"})
+    List<OrderItem> findByOrderId(UUID orderId);
 
-@EntityGraph(attributePaths = {"order", "item"})
-List<OrderItem> findByItemId(UUID itemId);
+    @EntityGraph(attributePaths = {"order", "item"})
+    List<OrderItem> findByItemId(UUID itemId);
 
-Page<OrderItem> findAll(Specification<OrderItem> specification, Pageable pageable);
+    @Modifying
+    @Query("UPDATE OrderItem oi SET oi.active = true WHERE oi.id = :id")
+    void activateOrderItem(@Param("id") UUID id);
 
-@Transactional
-void createOrderItem(OrderItem orderItem);
-
-@Transactional
-void updateOrderItem(OrderItem orderItem);
-
-@Transactional
-void activateOrderItem(UUID id);
-
-@Transactional
-void deactivateOrderItem(UUID id);
+    @Modifying
+    @Query("UPDATE OrderItem oi SET oi.active = false WHERE oi.id = :id")
+    void deactivateOrderItem(@Param("id") UUID id);
 
 }

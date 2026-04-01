@@ -12,6 +12,8 @@ import java.util.UUID;
 @Data
 public class UpdateOrderRequest {
 
+    private UUID id;
+
     private UUID userId;
 
     @Size(min = 2, max = 50)

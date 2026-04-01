@@ -10,47 +10,88 @@ import org.springframework.data.domain.Pageable;
 import com.javainternshiporderservice.dto.response.ItemResponse;
 import com.javainternshiporderservice.dto.request.create.CreateItemRequest;
 import com.javainternshiporderservice.dto.request.update.UpdateItemRequest;
-
+import com.javainternshiporderservice.mapper.ItemMapper;
+import com.javainternshiporderservice.model.Item;
+import com.javainternshiporderservice.model.specification.ItemSpecification;
+import com.javainternshiporderservice.exception.ItemNotFoundException;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
-private final ItemRepository itemRepository;
+    private static final String ITEM_NOT_FOUND_MESSAGE = "Item not found";
 
 
-@Override
-public ItemResponse getItemById(UUID id) {
-    return itemRepository.findById(id);
-}
 
-@Override
-public ItemResponse getItemByName(String name) {
-    return itemRepository.findByName(name);
-}
+    private final ItemMapper itemMapper;
+    private final ItemRepository itemRepository;
 
-@Override
-public Page<ItemResponse> getAllItems(Pageable pageable) {
-    return itemRepository.findAll(pageable);
-}
 
-@Override
-public void createItem(CreateItemRequest createItemRequest) {
-    itemRepository.createItem(createItemRequest);
-}       
+    @Override
+    public ItemResponse getItemById(UUID id) {
+        Specification<Item> spec = Specification
+            .where(ItemSpecification.hasId(id))
+            .and(ItemSpecification.isActive());
+        
+        Item item = itemRepository
+                .findOne(spec)
+                .orElseThrow(() -> new ItemNotFoundException(ITEM_NOT_FOUND_MESSAGE + " with id: " + id));
 
-@Override
-public void updateItem(UpdateItemRequest updateItemRequest) {
-    itemRepository.updateItem(updateItemRequest);
-}
+        return itemMapper.toItemResponse(item);
+    }
 
-@Override
-public void activateItem(UUID id) {
-    itemRepository.activateItem(id);
-}
+    @Override
+    public ItemResponse getItemByName(String name) {
+        Specification<Item> spec = Specification
+            .where(ItemSpecification.hasName(name))
+            .and(ItemSpecification.isActive());
 
-@Override
-public void deactivateItem(UUID id) {
-    itemRepository.deactivateItem(id);
-}
+        Item item = itemRepository
+                .findOne(spec)
+                .orElseThrow(() -> new ItemNotFoundException(ITEM_NOT_FOUND_MESSAGE + " with name: " + name));
+    
+        return itemMapper.toItemResponse(item);
+    }
+
+    @Override
+    public Page<ItemResponse> getAllItems(Pageable pageable) {
+        Specification<Item> spec = Specification
+            .where(ItemSpecification.isActive());
+
+        Page<Item> items = itemRepository.findAll(spec, pageable);
+
+        return itemMapper.toItemResponsesPage(items);
+
+    }
+
+    @Override
+    public ItemResponse createItem(CreateItemRequest createItemRequest) {
+        Item item = itemMapper.toItem(createItemRequest);
+        Item createdItem = itemRepository.save(item);
+        return itemMapper.toItemResponse(createdItem);
+
+    }       
+
+    @Override
+    public ItemResponse updateItem(UpdateItemRequest updateItemRequest) {
+        Item item = itemRepository
+            .findById(updateItemRequest.getId())
+            .orElseThrow(() -> new ItemNotFoundException(ITEM_NOT_FOUND_MESSAGE + " with id: " + updateItemRequest.getId()));
+        itemMapper.updateItem(updateItemRequest, item);
+        Item updatedItem = itemRepository.save(item);
+        return itemMapper.toItemResponse(updatedItem);
+    }
+
+    @Override
+    public void activateItem(UUID id) {
+        itemRepository.activateItem(id);
+    }
+
+    @Override
+    public void deactivateItem(UUID id) {
+        itemRepository.deactivateItem(id);
+    }
 
 }

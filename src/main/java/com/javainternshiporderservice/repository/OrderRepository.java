@@ -1,15 +1,14 @@
 package com.javainternshiporderservice.repository;
 
 import com.javainternshiporderservice.model.Order;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
+
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,17 +21,12 @@ public interface OrderRepository extends
     @Override
     Optional<Order> findById(UUID id);
 
-    @EntityGraph(attributePaths = {"orderItems"})
-    List<Order> findByUserId(UUID userId);
+    @Modifying
+    @Query("UPDATE Order o SET o.active = true WHERE o.id = :id")
+    void activateOrder(@Param("id") UUID id);
 
-    @EntityGraph(attributePaths = {"orderItems"})
-    @Override
-    Page<Order> findAll(Specification<Order> specification, Pageable pageable);
-
-    @Transactional
-    void activateOrder(UUID id);
-                                        
-    @Transactional
-    void deactivateOrder(UUID id);
+    @Modifying
+    @Query("UPDATE Order o SET o.active = false WHERE o.id = :id")
+    void deactivateOrder(@Param("id") UUID id);
 
 }
