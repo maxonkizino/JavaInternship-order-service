@@ -35,7 +35,7 @@ public class OrderSpecification {
      * @param userId the user UUID to filter by, null returns null (no filter)
      * @return Specification matching orders belonging to the user
      */
-    public static Specification<Order> hasUserId(UUID userId) {
+    public static Specification<Order> hasUserId(Long userId) {
         return (root, query, cb) ->
                 userId == null ? null :
                         cb.equal(root.get("userId"), userId);

@@ -1,6 +1,7 @@
 package com.javainternshiporderservice.dto.request.update;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -12,9 +13,10 @@ import java.util.UUID;
 @Data
 public class UpdateOrderRequest {
 
+    @NotNull
     private UUID id;
 
-    private UUID userId;
+    private Long userId;
 
     @Size(min = 2, max = 50)
     private String status;

@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -81,6 +82,7 @@ public class OrderItemServiceImpl implements OrderItemService {
     }
 
     @Override
+    @Transactional
     public OrderItemResponse createOrderItem(CreateOrderItemRequest createOrderItemRequest) {
         OrderItem orderItem = orderItemMapper.toOrderItem(createOrderItemRequest);
         OrderItem createdOrderItem = orderItemRepository.save(orderItem);
@@ -88,6 +90,7 @@ public class OrderItemServiceImpl implements OrderItemService {
     }
 
     @Override
+    @Transactional
     public OrderItemResponse updateOrderItem(UpdateOrderItemRequest updateOrderItemRequest) {
         OrderItem orderItem = orderItemRepository
             .findById(updateOrderItemRequest.getId())
@@ -100,11 +103,13 @@ public class OrderItemServiceImpl implements OrderItemService {
     }
 
     @Override
+    @Transactional
     public void activateOrderItem(UUID id) {
         orderItemRepository.activateOrderItem(id);
     }
 
     @Override
+    @Transactional
     public void deactivateOrderItem(UUID id) {
         orderItemRepository.deactivateOrderItem(id);
     }

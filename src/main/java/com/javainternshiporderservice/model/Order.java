@@ -18,7 +18,7 @@ public class Order extends BaseAuditingEntity{
     private UUID id;
 
     @Column(name = "user_id", nullable = false)
-    private UUID userId;
+    private Long userId;
 
     @Column(name = "status", nullable = false, length = 50)
     private String status;

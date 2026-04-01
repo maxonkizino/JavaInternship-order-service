@@ -15,8 +15,7 @@ import com.javainternshiporderservice.model.Item;
 import com.javainternshiporderservice.model.specification.ItemSpecification;
 import com.javainternshiporderservice.exception.ItemNotFoundException;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
+import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
@@ -67,6 +66,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemResponse createItem(CreateItemRequest createItemRequest) {
         Item item = itemMapper.toItem(createItemRequest);
         Item createdItem = itemRepository.save(item);
@@ -75,6 +75,7 @@ public class ItemServiceImpl implements ItemService {
     }       
 
     @Override
+    @Transactional
     public ItemResponse updateItem(UpdateItemRequest updateItemRequest) {
         Item item = itemRepository
             .findById(updateItemRequest.getId())
@@ -85,11 +86,13 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public void activateItem(UUID id) {
         itemRepository.activateItem(id);
     }
 
     @Override
+    @Transactional
     public void deactivateItem(UUID id) {
         itemRepository.deactivateItem(id);
     }

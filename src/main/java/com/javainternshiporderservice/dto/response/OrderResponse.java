@@ -11,7 +11,7 @@ import java.util.UUID;
 public class OrderResponse {
 
     private UUID id;
-    private UUID userId;
+    private Long userId;
     private String status;
     private BigDecimal totalPrice;
     private boolean active;

@@ -16,7 +16,7 @@ import java.util.UUID;
 public class CreateOrderRequest {
 
     @NotNull
-    private UUID userId;
+    private Long userId;
 
     @NotBlank
     @Size(min = 2, max = 50)
