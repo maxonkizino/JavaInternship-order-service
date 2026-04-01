@@ -11,6 +11,12 @@ spring:
       ddl-auto: none
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080}
+          jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8080/.well-known/jwks.json}
 
 # User Service configuration
 USER_SERVICE_URL: ${USER_SERVICE_URL:http://localhost:8080}
@@ -37,4 +43,3 @@ resilience4j:
       default:
         timeout-duration: 4s
         cancel-running-future: true
-
