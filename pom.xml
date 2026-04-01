@@ -113,6 +113,14 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- WireMock for mocking external services -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-contract-wiremock</artifactId>
+            <version>4.1.0</version>
+            <scope>test</scope>
+        </dependency>
+
 
 
         <dependency>
