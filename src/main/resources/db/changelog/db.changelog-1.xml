@@ -17,7 +17,17 @@
             <column name="price" type="DECIMAL(10,2)">
                 <constraints nullable="false"/>
             </column>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
+
     </changeSet>
 
     <changeSet id="2-add-orders" author="maxonkizino">
@@ -34,7 +44,13 @@
             <column name="total_price" type="DECIMAL(10,2)" defaultValue="0.00">
                 <constraints nullable="false"/>
             </column>
-            <column name="deleted" type="BOOLEAN" defaultValueBoolean="false">
+             <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -52,6 +68,15 @@
                 <constraints nullable="false"/>
             </column>
             <column name="quantity" type="INT">
+                <constraints nullable="false"/>
+            </column>
+             <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -76,8 +101,8 @@
             <column name="status"/>
         </createIndex>
 
-        <createIndex tableName="orders" indexName="idx_orders_deleted">
-            <column name="deleted"/>
+        <createIndex tableName="orders" indexName="idx_orders_active">
+            <column name="active"/>
         </createIndex>
 
         <createIndex tableName="order_items" indexName="idx_order_items_order_id">

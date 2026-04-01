@@ -2,8 +2,9 @@ package com.javainternshiporderservice.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,24 +13,23 @@ import java.util.UUID;
 @Data
 public class Order extends BaseAuditingEntity{
 
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "user_id")
+    @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @Column(name = "status")
+    @Column(name = "status", nullable = false, length = 50)
     private String status;
 
-    @Column(name = "total_price")
+    @Column(name = "total_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPrice;
 
-    @Column(name = "deleted")
-    private boolean deleted;
-
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderItem> orderItems;
+
+    @Column(name = "active", nullable = false)
+    private boolean active = true;
 
 }

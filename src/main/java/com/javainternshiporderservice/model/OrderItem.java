@@ -9,26 +9,21 @@ import java.util.UUID;
 @Data
 public class OrderItem extends BaseAuditingEntity{
 
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "order_id")
-    private UUID orderId;
-
-    @Column(name = "item_id")
-    private UUID itemId;
 
     @Column(name = "quantity")
     private int quantity;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
     private Order order;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
-    private Items item;
+    private Item item;
 
+    @Column(name = "active")
+    private boolean active;
 }

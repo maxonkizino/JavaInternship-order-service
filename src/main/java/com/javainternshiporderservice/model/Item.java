@@ -1,22 +1,18 @@
 package com.javainternshiporderservice.model;
 
-
 import jakarta.persistence.*;
 import lombok.Data;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-
 
 @Entity
 @Table(name = "items")
 @Data
-public class Items extends BaseAuditingEntity{
-
+public class Item extends BaseAuditingEntity{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "name")
@@ -25,8 +21,12 @@ public class Items extends BaseAuditingEntity{
     @Column(name = "price")
     private BigDecimal price;
 
-    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderItem> orderItems;
 
+    @Column(name = "active")
+    private boolean active;
+
+   
 
 }
