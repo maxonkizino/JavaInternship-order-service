@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 
 import java.util.UUID;
 
@@ -30,6 +32,17 @@ import java.util.UUID;
 public class OrderItemController {
 
     private final OrderItemService orderItemService;
+
+    @GetMapping("/filtered")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<Page<OrderItemResponse>> getOrderItemsWithFilter(
+            @RequestParam(required = false) Boolean active,
+            @RequestParam(required = false) UUID orderId,
+            @RequestParam(required = false) UUID itemId,
+            Pageable pageable) {
+        Page<OrderItemResponse> orderItems = orderItemService.getOrderItemsWithFilter(active, orderId, itemId, pageable);
+        return ResponseEntity.ok(orderItems);
+    }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")

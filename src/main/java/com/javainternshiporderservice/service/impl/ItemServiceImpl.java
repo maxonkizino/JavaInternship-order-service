@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import com.javainternshiporderservice.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import com.javainternshiporderservice.repository.ItemRepository;
+import java.math.BigDecimal;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,8 @@ import com.javainternshiporderservice.model.specification.ItemSpecification;
 import com.javainternshiporderservice.exception.ItemNotFoundException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
+
+
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
@@ -62,7 +65,29 @@ public class ItemServiceImpl implements ItemService {
         Page<Item> items = itemRepository.findAll(spec, pageable);
 
         return itemMapper.toItemResponsesPage(items);
+    }
 
+    @Override
+    public Page<ItemResponse> getItemsWithFilter(
+            Boolean active,
+            String name,
+            BigDecimal price,
+            Pageable pageable) {
+
+        Specification<Item> spec = (root, query, cb) -> null;
+
+        if (active != null) {
+            spec = spec.and(ItemSpecification.hasActive(active));
+        }
+        if (name != null) {
+            spec = spec.and(ItemSpecification.hasName(name));
+        }
+        if (price != null) {
+            spec = spec.and(ItemSpecification.hasPrice(price));
+        }
+
+        Page<Item> items = itemRepository.findAll(spec, pageable);
+        return itemMapper.toItemResponsesPage(items);
     }
 
     @Override

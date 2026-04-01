@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -33,6 +35,21 @@ import java.util.UUID;
 public class OrderController {
 
     private final OrderService orderService;
+
+    @GetMapping("/filtered")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<Page<OrderWithUserResponse>> getOrdersWithFilter(
+            @RequestParam(required = false) Boolean active,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) List<String> statuses,
+            @RequestParam(required = false) Instant createdAtFrom,
+            @RequestParam(required = false) Instant createdAtTo,
+            @RequestParam(required = false) Long userId,
+            Pageable pageable) {
+        Page<OrderWithUserResponse> orders = orderService.getOrdersWithFilter(
+                active, status, statuses, createdAtFrom, createdAtTo, userId, pageable);
+        return ResponseEntity.ok(orders);
+    }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")

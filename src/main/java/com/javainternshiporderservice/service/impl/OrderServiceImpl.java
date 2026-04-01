@@ -20,6 +20,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -67,6 +68,46 @@ public class OrderServiceImpl implements OrderService {
     public Page<OrderWithUserResponse> getAllOrders(Pageable pageable) {
         Specification<Order> spec = Specification
             .where(OrderSpecification.isActive());
+
+        Page<Order> orders = orderRepository.findAll(spec, pageable);
+
+        List<OrderWithUserResponse> content = orders.getContent().stream()
+                .map(order -> {
+                    UserInfoResponse userInfo = userServiceClient.fetchUserById(order.getUserId());
+                    return orderWithUserAssembler.assemble(order, userInfo);
+                })
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(content, orders.getPageable(), orders.getTotalElements());
+    }
+
+    @Override
+    public Page<OrderWithUserResponse> getOrdersWithFilter(
+            Boolean active,
+            String status,
+            List<String> statuses,
+            Instant createdAtFrom,
+            Instant createdAtTo,
+            Long userId,
+            Pageable pageable) {
+
+        Specification<Order> spec = (root, query, cb) -> null;
+
+        if (active != null) {
+            spec = spec.and(OrderSpecification.hasActive(active));
+        }
+        if (status != null) {
+            spec = spec.and(OrderSpecification.hasStatus(status));
+        }
+        if (statuses != null && !statuses.isEmpty()) {
+            spec = spec.and(OrderSpecification.hasStatuses(statuses));
+        }
+        if (createdAtFrom != null || createdAtTo != null) {
+            spec = spec.and(OrderSpecification.createdAtBetween(createdAtFrom, createdAtTo));
+        }
+        if (userId != null) {
+            spec = spec.and(OrderSpecification.hasUserId(userId));
+        }
 
         Page<Order> orders = orderRepository.findAll(spec, pageable);
 

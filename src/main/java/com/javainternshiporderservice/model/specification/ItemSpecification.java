@@ -63,4 +63,16 @@ public class ItemSpecification {
         return (root, query, cb) -> cb.isTrue(root.get("active"));
     }
 
+    /**
+     * Creates a specification to filter items by active status.
+     *
+     * @param active the active status to filter by, null returns null (no filter)
+     * @return Specification matching items with the given active status
+     */
+    public static Specification<Item> hasActive(Boolean active) {
+        return (root, query, cb) ->
+                active == null ? null :
+                        cb.equal(root.get("active"), active);
+    }
+
 }

@@ -43,6 +43,21 @@ public interface ItemService {
     Page<ItemResponse> getAllItems(Pageable pageable);
 
     /**
+     * Retrieves items with dynamic filtering.
+     *
+     * @param active filter by active status
+     * @param name filter by name (partial match)
+     * @param price filter by exact price
+     * @param pageable pagination information
+     * @return Page of ItemResponse
+     */
+    Page<ItemResponse> getItemsWithFilter(
+            Boolean active,
+            String name,
+            java.math.BigDecimal price,
+            Pageable pageable);
+
+    /**
      * Creates a new item.
      *
      * @param createItemRequest the item creation request

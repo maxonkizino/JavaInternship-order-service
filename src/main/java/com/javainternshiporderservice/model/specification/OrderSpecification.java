@@ -98,4 +98,17 @@ public class OrderSpecification {
         return (root, query, cb) -> cb.isTrue(root.get("active"));
     }
 
+    /**
+     * Creates a specification to filter orders by active status.
+     * Supports both true and false values.
+     *
+     * @param active the active status to filter by, null returns null (no filter)
+     * @return Specification matching orders with the given active status
+     */
+    public static Specification<Order> hasActive(Boolean active) {
+        return (root, query, cb) ->
+                active == null ? null :
+                        cb.equal(root.get("active"), active);
+    }
+
 }

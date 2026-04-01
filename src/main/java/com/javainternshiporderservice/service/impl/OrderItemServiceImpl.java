@@ -82,6 +82,29 @@ public class OrderItemServiceImpl implements OrderItemService {
     }
 
     @Override
+    public Page<OrderItemResponse> getOrderItemsWithFilter(
+            Boolean active,
+            UUID orderId,
+            UUID itemId,
+            Pageable pageable) {
+
+        Specification<OrderItem> spec = (root, query, cb) -> null;
+
+        if (active != null) {
+            spec = spec.and(OrderItemSpecification.hasActive(active));
+        }
+        if (orderId != null) {
+            spec = spec.and(OrderItemSpecification.hasOrderId(orderId));
+        }
+        if (itemId != null) {
+            spec = spec.and(OrderItemSpecification.hasItemId(itemId));
+        }
+
+        Page<OrderItem> orderItems = orderItemRepository.findAll(spec, pageable);
+        return orderItemMapper.toOrderItemResponsesPage(orderItems);
+    }
+
+    @Override
     @Transactional
     public OrderItemResponse createOrderItem(CreateOrderItemRequest createOrderItemRequest) {
         OrderItem orderItem = orderItemMapper.toOrderItem(createOrderItemRequest);

@@ -52,6 +52,21 @@ public interface OrderItemService {
     Page<OrderItemResponse> getAllOrderItems(Pageable pageable);
 
     /**
+     * Retrieves order items with dynamic filtering.
+     *
+     * @param active filter by active status
+     * @param orderId filter by order ID
+     * @param itemId filter by item ID
+     * @param pageable pagination information
+     * @return Page of OrderItemResponse
+     */
+    Page<OrderItemResponse> getOrderItemsWithFilter(
+            Boolean active,
+            UUID orderId,
+            UUID itemId,
+            Pageable pageable);
+
+    /**
      * Creates a new order item.
      *
      * @param createOrderItemRequest the order item creation request

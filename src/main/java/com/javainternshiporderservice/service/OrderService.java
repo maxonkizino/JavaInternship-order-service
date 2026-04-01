@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -17,6 +19,15 @@ public interface OrderService {
     OrderWithUserResponse getOrderByUserId(Long userId);
 
     Page<OrderWithUserResponse> getAllOrders(Pageable pageable);
+
+    Page<OrderWithUserResponse> getOrdersWithFilter(
+            Boolean active,
+            String status,
+            List<String> statuses,
+            Instant createdAtFrom,
+            Instant createdAtTo,
+            Long userId,
+            Pageable pageable);
 
     OrderWithUserResponse createOrder(CreateOrderRequest createOrderRequest);
 
