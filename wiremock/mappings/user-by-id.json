@@ -1,0 +1,20 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/api/users/([0-9]+)"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "{{request.pathSegments.[2]}}",
+      "name": "Test",
+      "surname": "User",
+      "email": "test@example.com",
+      "birthDate": "1990-01-01",
+      "active": true
+    }
+  }
+}
