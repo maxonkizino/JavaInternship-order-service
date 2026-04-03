@@ -28,13 +28,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
     private static final String ORDER_NOT_FOUND_MESSAGE = "Order not found";
+    private static final String WITH_ID = " with id: ";
     private static final String ACCESS_DENIED_TO_ORDER = "Access denied to order: ";
     private static final String ACCESS_DENIED_TO_ORDERS_FOR_USER = "Access denied to orders for user: ";
     private static final String ACCESS_DENIED_FILTER_BY_OTHER_USER = "Access denied: cannot filter by other user ID";
@@ -60,7 +59,7 @@ public class OrderServiceImpl implements OrderService {
 
         Order order = orderRepository
                 .findOne(spec)
-                .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + " with id: " + id));
+                .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + WITH_ID + id));
 
         if (!securityUtils.isOwnerOrAdmin(order.getUserId())) {
             throw new AccessDeniedException(ACCESS_DENIED_TO_ORDER + id);
@@ -107,7 +106,7 @@ public class OrderServiceImpl implements OrderService {
                     UserInfoResponse userInfo = userServiceClient.fetchUserById(order.getUserId());
                     return orderWithUserAssembler.assemble(order, userInfo);
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         return new PageImpl<>(content, orders.getPageable(), orders.getTotalElements());
     }
@@ -158,7 +157,7 @@ public class OrderServiceImpl implements OrderService {
                     UserInfoResponse userInfo = userServiceClient.fetchUserById(order.getUserId());
                     return orderWithUserAssembler.assemble(order, userInfo);
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         return new PageImpl<>(content, orders.getPageable(), orders.getTotalElements());
     }
@@ -194,7 +193,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderWithUserResponse updateOrder(UpdateOrderRequest updateOrderRequest) {
         Order order = orderRepository
             .findById(updateOrderRequest.getId())
-            .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + " with id: " + updateOrderRequest.getId()));
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + WITH_ID + updateOrderRequest.getId()));
 
         if (!securityUtils.isOwnerOrAdmin(order.getUserId())) {
             throw new AccessDeniedException(ACCESS_DENIED_UPDATE_ORDER + updateOrderRequest.getId());
@@ -216,7 +215,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void activateOrder(UUID id) {
         Order order = orderRepository.findById(id)
-            .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + " with id: " + id));
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + WITH_ID + id));
 
         if (!securityUtils.isOwnerOrAdmin(order.getUserId())) {
             throw new AccessDeniedException(ACCESS_DENIED_ACTIVATE + id);
@@ -229,7 +228,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void deactivateOrder(UUID id) {
         Order order = orderRepository.findById(id)
-            .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + " with id: " + id));
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + WITH_ID + id));
 
         if (!securityUtils.isOwnerOrAdmin(order.getUserId())) {
             throw new AccessDeniedException(ACCESS_DENIED_DEACTIVATE + id);
@@ -243,7 +242,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderWithUserResponse getOrderWithUserById(UUID orderId, String userEmail) {
         Order order = orderRepository
                 .findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + " with id: " + orderId));
+                .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + WITH_ID + orderId));
 
         if (!securityUtils.isOwnerOrAdmin(order.getUserId())) {
             throw new AccessDeniedException(ACCESS_DENIED_TO_ORDER + orderId);

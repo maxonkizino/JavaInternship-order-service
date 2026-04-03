@@ -12,7 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * MapStruct mapper for converting between OrderItem entity and DTOs.
@@ -68,7 +67,7 @@ public interface OrderItemMapper {
         }
         List<OrderItemResponse> content = orderItems.getContent().stream()
                 .map(this::toOrderItemResponse)
-                .collect(Collectors.toList());
+                .toList();
         return new PageImpl<>(content, orderItems.getPageable(), orderItems.getTotalElements());
     }
 

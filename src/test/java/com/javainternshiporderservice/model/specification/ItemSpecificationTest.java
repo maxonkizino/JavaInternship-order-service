@@ -2,6 +2,9 @@ package com.javainternshiporderservice.model.specification;
 
 import com.javainternshiporderservice.model.Item;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
@@ -24,28 +27,11 @@ class ItemSpecificationTest {
         assertThat(spec).isNotNull();
     }
 
-    @Test
-    void hasName_shouldReturnSpecification_whenNameProvided() {
-        Specification<Item> spec = ItemSpecification.hasName("Test");
-        assertThat(spec).isNotNull();
-    }
-
-    @Test
-    void hasName_shouldReturnSpecification_whenNameIsNull() {
-        Specification<Item> spec = ItemSpecification.hasName(null);
-        assertThat(spec).isNotNull();
-    }
-
-    @Test
-    void hasName_shouldHandleEmptyString() {
-        Specification<Item> spec = ItemSpecification.hasName("");
-        assertThat(spec).isNotNull();
-    }
-
-    @Test
-    void hasName_shouldHandleCaseInsensitivity() {
-        Specification<Item> spec = ItemSpecification.hasName("TeSt");
-        assertThat(spec).isNotNull();
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {"Test", "TeSt"})
+    void hasName_shouldReturnNonNullSpecification(String name) {
+        assertThat(ItemSpecification.hasName(name)).isNotNull();
     }
 
     @Test

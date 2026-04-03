@@ -12,10 +12,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.DefaultResponseErrorHandler;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -23,6 +25,7 @@ import java.time.LocalDate;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Test to verify WireMock is properly configured and can mock User Service responses
@@ -148,7 +151,14 @@ class WireMockConfigurationTest {
                         .withStatus(200)
                         .withFixedDelay(5000))); // 5 second delay
 
-        // when & then - Circuit Breaker should trigger fallback
-        // This tests the timeout configuration
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setReadTimeout(500);
+        RestTemplate shortTimeout = createRestTemplate();
+        shortTimeout.setRequestFactory(factory);
+
+        assertThatThrownBy(() -> shortTimeout.getForEntity(
+                        "http://localhost:" + wireMockServer.port() + "/api/users/" + userId,
+                        String.class))
+                .isInstanceOf(ResourceAccessException.class);
     }
 }

@@ -200,6 +200,6 @@ class OrderItemControllerTest {
         ResponseEntity<OrderItemResponse> response = orderItemController.updateOrderItem(updateOrderItemRequest);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().getQuantity()).isEqualTo(0);
+        assertThat(response.getBody().getQuantity()).isZero();
     }
 }

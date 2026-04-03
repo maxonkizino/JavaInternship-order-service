@@ -161,7 +161,7 @@ class ItemMapperTest {
         assertThat(responsePage.getContent()).hasSize(1);
         assertThat(responsePage.getContent().get(0).getName()).isEqualTo("Paged Item");
         assertThat(responsePage.getTotalElements()).isEqualTo(1);
-        assertThat(responsePage.getNumber()).isEqualTo(0);
+        assertThat(responsePage.getNumber()).isZero();
     }
 
     @Test

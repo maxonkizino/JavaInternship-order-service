@@ -12,7 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * MapStruct mapper for converting between Item entity and DTOs.
@@ -68,7 +67,7 @@ public interface ItemMapper {
         }
         List<ItemResponse> content = items.getContent().stream()
                 .map(this::toItemResponse)
-                .collect(Collectors.toList());
+                .toList();
         return new PageImpl<>(content, items.getPageable(), items.getTotalElements());
     }
 

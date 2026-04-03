@@ -168,11 +168,16 @@ class OrderServiceWireMockTest {
                         .withHeader("Content-Type", "application/json")
                         .withBody("{\"id\": 777, \"name\": \"Success\"}")));
 
-        // when
-        UserInfoResponse result = userServiceClient.fetchUserById(userId);
+        UserInfoResponse user = userServiceClient.fetchUserById(userId);
 
-        // then - Circuit Breaker may trigger depending on configuration
-        // In this case, it should eventually succeed or fallback
+        assertThat(user).isNotNull();
+        // Either WireMock eventually returns 200 (retries + CB config) or the client uses fallback
+        if ("Unknown".equals(user.getName())) {
+            assertThat(user.getSurname()).isEqualTo("User");
+        } else {
+            assertThat(user.getName()).isEqualTo("Success");
+            assertThat(user.getId()).isEqualTo(userId);
+        }
     }
 
     @Test

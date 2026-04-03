@@ -3,8 +3,8 @@ package com.javainternshiporderservice.client;
 import com.javainternshiporderservice.dto.response.UserInfoResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreakerFactory;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
-import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Supplier;
@@ -17,7 +17,7 @@ public class UserServiceClient {
     private static final String USER_SERVICE_CB = "userService";
 
     private final UserClient userClient;
-    private final CircuitBreakerFactory circuitBreakerFactory;
+    private final Resilience4JCircuitBreakerFactory circuitBreakerFactory;
     private final UserServiceFallback fallback;
 
     public UserInfoResponse fetchUserById(Long userId) {

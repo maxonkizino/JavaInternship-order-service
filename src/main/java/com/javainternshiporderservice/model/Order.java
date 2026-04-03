@@ -2,8 +2,7 @@ package com.javainternshiporderservice.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;

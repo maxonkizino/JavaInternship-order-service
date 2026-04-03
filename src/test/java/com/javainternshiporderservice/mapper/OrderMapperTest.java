@@ -4,7 +4,6 @@ import com.javainternshiporderservice.dto.request.create.CreateOrderItemRequest;
 import com.javainternshiporderservice.dto.request.create.CreateOrderRequest;
 import com.javainternshiporderservice.dto.request.update.UpdateOrderItemRequest;
 import com.javainternshiporderservice.dto.request.update.UpdateOrderRequest;
-import com.javainternshiporderservice.dto.response.OrderItemResponse;
 import com.javainternshiporderservice.dto.response.OrderResponse;
 import com.javainternshiporderservice.model.Order;
 import com.javainternshiporderservice.model.OrderItem;

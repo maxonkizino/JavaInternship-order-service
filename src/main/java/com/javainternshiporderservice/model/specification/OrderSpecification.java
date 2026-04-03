@@ -13,6 +13,8 @@ import java.util.UUID;
  */
 public class OrderSpecification {
 
+    private static final String CREATED_AT = "createdAt";
+
     private OrderSpecification() {
         // Private constructor to prevent instantiation
     }
@@ -80,12 +82,12 @@ public class OrderSpecification {
                 return null;
             }
             if (from == null) {
-                return cb.lessThanOrEqualTo(root.get("createdAt"), to);
+                return cb.lessThanOrEqualTo(root.get(CREATED_AT), to);
             }
             if (to == null) {
-                return cb.greaterThanOrEqualTo(root.get("createdAt"), from);
+                return cb.greaterThanOrEqualTo(root.get(CREATED_AT), from);
             }
-            return cb.between(root.get("createdAt"), from, to);
+            return cb.between(root.get(CREATED_AT), from, to);
         };
     }
 

@@ -3,6 +3,8 @@ package com.javainternshiporderservice.exception;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -12,9 +14,15 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class GlobalExceptionHandlerTest {
 
@@ -100,13 +108,31 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleMissingPathVariable_shouldReturnBadRequest() {
-        // Skip this test as MissingPathVariableException requires complex Spring setup
-        // The handler method is tested implicitly through integration tests
+        MissingPathVariableException ex = mock(MissingPathVariableException.class);
+        when(ex.getMessage()).thenReturn("Required URI template variable 'id' is not present");
+
+        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = exceptionHandler.handleMissingPathVariable(ex);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(Objects.requireNonNull(response.getBody()).status()).isEqualTo(400);
+        assertThat(response.getBody().message()).contains("id");
     }
 
     @Test
     void handleHttpMessageNotReadable_shouldReturnBadRequest() {
-        HttpMessageNotReadableException ex = new HttpMessageNotReadableException("Invalid JSON format");
+        HttpInputMessage inputMessage = new HttpInputMessage() {
+            @Override
+            public InputStream getBody() throws IOException {
+                return new ByteArrayInputStream("{}".getBytes(StandardCharsets.UTF_8));
+            }
+
+            @Override
+            public HttpHeaders getHeaders() {
+                return new HttpHeaders();
+            }
+        };
+        HttpMessageNotReadableException ex = new HttpMessageNotReadableException(
+                "Invalid JSON format", new RuntimeException("parse"), inputMessage);
 
         ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = exceptionHandler.handleHttpMessageNotReadable(ex);
 

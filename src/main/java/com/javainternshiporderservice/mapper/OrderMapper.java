@@ -12,7 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
@@ -32,7 +31,7 @@ public interface OrderMapper {
         }
         List<OrderResponse> content = orders.getContent().stream()
                 .map(this::toOrderResponse)
-                .collect(Collectors.toList());
+                .toList();
         return new PageImpl<>(content, orders.getPageable(), orders.getTotalElements());
     }
 
