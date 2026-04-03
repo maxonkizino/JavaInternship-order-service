@@ -2,6 +2,7 @@ package com.javainternshiporderservice.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import com.javainternshiporderservice.dto.response.UserInfoResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -21,14 +23,24 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDate;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.reset;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Testcontainers
 @AutoConfigureWireMock(port = 0)
+@Sql(scripts = {"/clean-orders.sql", "/item-seed.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class OrderControllerIntegrationTest {
 
     @Container
@@ -66,7 +78,7 @@ class OrderControllerIntegrationTest {
         userInfo.setBirthDate(LocalDate.of(1990, 1, 1));
         userInfo.setActive(true);
 
-        stubFor(get(urlEqualTo("/api/users/1"))
+        stubFor(WireMock.get(urlEqualTo("/api/users/1"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
@@ -77,7 +89,9 @@ class OrderControllerIntegrationTest {
                 "userId": 1,
                 "status": "PENDING",
                 "totalPrice": 150.00,
-                "orderItems": [],
+                "orderItems": [
+                    { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
+                ],
                 "active": true
             }
             """;
@@ -105,7 +119,7 @@ class OrderControllerIntegrationTest {
         userInfo.setBirthDate(LocalDate.of(1990, 1, 1));
         userInfo.setActive(true);
 
-        stubFor(get(urlEqualTo("/api/users/1"))
+        stubFor(WireMock.get(urlEqualTo("/api/users/1"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
@@ -116,7 +130,9 @@ class OrderControllerIntegrationTest {
                 "userId": 1,
                 "status": "PENDING",
                 "totalPrice": 150.00,
-                "orderItems": [],
+                "orderItems": [
+                    { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
+                ],
                 "active": true
             }
             """;
@@ -161,7 +177,7 @@ class OrderControllerIntegrationTest {
         userInfo.setBirthDate(LocalDate.of(1990, 1, 1));
         userInfo.setActive(true);
 
-        stubFor(get(urlEqualTo("/api/users/1"))
+        stubFor(WireMock.get(urlEqualTo("/api/users/1"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
@@ -172,7 +188,9 @@ class OrderControllerIntegrationTest {
                 "userId": 1,
                 "status": "PENDING",
                 "totalPrice": 150.00,
-                "orderItems": [],
+                "orderItems": [
+                    { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
+                ],
                 "active": true
             }
             """;
@@ -209,7 +227,7 @@ class OrderControllerIntegrationTest {
         userInfo.setBirthDate(LocalDate.of(1990, 1, 1));
         userInfo.setActive(true);
 
-        stubFor(get(urlMatching("/api/users/\\d+"))
+        stubFor(WireMock.get(urlMatching("/api/users/\\d+"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
@@ -234,7 +252,7 @@ class OrderControllerIntegrationTest {
         userInfo.setBirthDate(LocalDate.of(1990, 1, 1));
         userInfo.setActive(true);
 
-        stubFor(get(urlEqualTo("/api/users/1"))
+        stubFor(WireMock.get(urlEqualTo("/api/users/1"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
@@ -245,7 +263,9 @@ class OrderControllerIntegrationTest {
                 "userId": 1,
                 "status": "PENDING",
                 "totalPrice": 150.00,
-                "orderItems": [],
+                "orderItems": [
+                    { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
+                ],
                 "active": true
             }
             """;
@@ -268,7 +288,7 @@ class OrderControllerIntegrationTest {
     @WithMockUser(username = "1", authorities = {"ROLE_USER"})
     void userServiceCircuitBreaker_shouldReturnFallback_whenUserServiceIsDown() throws Exception {
         // given - User Service returns error (simulating Circuit Breaker)
-        stubFor(get(urlEqualTo("/api/users/1"))
+        stubFor(WireMock.get(urlEqualTo("/api/users/1"))
                 .willReturn(aResponse()
                         .withStatus(500)
                         .withBody("Service Unavailable")));
@@ -278,7 +298,9 @@ class OrderControllerIntegrationTest {
                 "userId": 1,
                 "status": "PENDING",
                 "totalPrice": 150.00,
-                "orderItems": [],
+                "orderItems": [
+                    { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
+                ],
                 "active": true
             }
             """;

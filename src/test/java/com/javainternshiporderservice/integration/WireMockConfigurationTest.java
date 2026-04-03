@@ -14,8 +14,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.time.LocalDate;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -35,7 +38,18 @@ class WireMockConfigurationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = createRestTemplate();
+
+    private static RestTemplate createRestTemplate() {
+        RestTemplate template = new RestTemplate();
+        template.setErrorHandler(new DefaultResponseErrorHandler() {
+            @Override
+            public boolean hasError(ClientHttpResponse response) throws IOException {
+                return false;
+            }
+        });
+        return template;
+    }
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {

@@ -8,8 +8,11 @@ import com.javainternshiporderservice.dto.response.UserInfoResponse;
 import com.javainternshiporderservice.exception.OrderNotFoundException;
 import com.javainternshiporderservice.mapper.OrderMapper;
 import com.javainternshiporderservice.mapper.OrderWithUserAssembler;
+import com.javainternshiporderservice.dto.request.create.CreateOrderItemRequest;
 import com.javainternshiporderservice.model.Order;
+import com.javainternshiporderservice.model.OrderItem;
 import com.javainternshiporderservice.model.specification.OrderSpecification;
+import com.javainternshiporderservice.repository.ItemRepository;
 import com.javainternshiporderservice.repository.OrderRepository;
 import com.javainternshiporderservice.security.SecurityUtils;
 import com.javainternshiporderservice.service.OrderService;
@@ -44,10 +47,12 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
     private final OrderWithUserAssembler orderWithUserAssembler;
     private final OrderRepository orderRepository;
+    private final ItemRepository itemRepository;
     private final UserServiceClient userServiceClient;
     private final SecurityUtils securityUtils;
 
     @Override
+    @Transactional(readOnly = true)
     public OrderWithUserResponse getOrderById(UUID id) {
         Specification<Order> spec = Specification
             .where(OrderSpecification.hasId(id))
@@ -66,6 +71,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public OrderWithUserResponse getOrderByUserId(Long userId) {
         if (!securityUtils.isOwnerOrAdmin(userId)) {
             throw new AccessDeniedException(ACCESS_DENIED_TO_ORDERS_FOR_USER + userId);
@@ -84,6 +90,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<OrderWithUserResponse> getAllOrders(Pageable pageable) {
         Specification<Order> spec = Specification.where(OrderSpecification.isActive());
 
@@ -106,6 +113,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<OrderWithUserResponse> getOrdersWithFilter(
             Boolean active,
             String status,
@@ -167,6 +175,15 @@ public class OrderServiceImpl implements OrderService {
         }
 
         Order order = orderMapper.toOrder(createOrderRequest);
+        if (order.getOrderItems() != null && createOrderRequest.getOrderItems() != null) {
+            List<OrderItem> orderItems = order.getOrderItems();
+            List<CreateOrderItemRequest> itemRequests = createOrderRequest.getOrderItems();
+            for (int i = 0; i < orderItems.size(); i++) {
+                OrderItem orderItem = orderItems.get(i);
+                orderItem.setOrder(order);
+                orderItem.setItem(itemRepository.getReferenceById(itemRequests.get(i).getItemId()));
+            }
+        }
         Order createdOrder = orderRepository.save(order);
         UserInfoResponse userInfo = userServiceClient.fetchUserById(createdOrder.getUserId());
         return orderWithUserAssembler.assemble(createdOrder, userInfo);
@@ -222,6 +239,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public OrderWithUserResponse getOrderWithUserById(UUID orderId, String userEmail) {
         Order order = orderRepository
                 .findById(orderId)

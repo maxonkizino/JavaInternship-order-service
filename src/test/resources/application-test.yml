@@ -1,10 +1,6 @@
-
 spring:
   datasource:
-  
-    url: jdbc:tc:postgresql:16-alpine:///order_service_test
-    username: test
-    password: test
+    url: jdbc:tc:postgresql:16-alpine:///order_service_test?user=postgres&password=postgres
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
   jpa:
     hibernate:
@@ -18,16 +14,12 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-
           enabled: false
-
 
 USER_SERVICE_URL: http://localhost:8080
 
-
 spring.cloud.openfeign.client.config.default.connectTimeout: 1000
 spring.cloud.openfeign.client.config.default.readTimeout: 1000
-
 
 resilience4j:
   circuitbreaker:
@@ -48,7 +40,6 @@ resilience4j:
         timeout-duration: 1s
         cancel-running-future: true
 
-
 logging:
   level:
     com.javainternshiporderservice: INFO
@@ -57,10 +48,8 @@ logging:
   pattern:
     console: "%d{HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
-
 server:
-  port: 0  
-
+  port: 0
 
 management:
   endpoints:

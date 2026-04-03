@@ -85,7 +85,7 @@ class OrderServiceWireMockTest {
         expectedUser.setBirthDate(LocalDate.of(1990, 1, 1));
         expectedUser.setActive(true);
 
-        stubFor(get(urlEqualTo("/api/users/by-email/" + email))
+        stubFor(get(urlEqualTo("/api/users/by-email/john%40example.com"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
@@ -98,7 +98,7 @@ class OrderServiceWireMockTest {
         assertThat(actualUser.getEmail()).isEqualTo(email);
         assertThat(actualUser.getName()).isEqualTo("John");
 
-        verify(getRequestedFor(urlEqualTo("/api/users/by-email/" + email)));
+        verify(getRequestedFor(urlEqualTo("/api/users/by-email/john%40example.com")));
     }
 
     @Test
