@@ -12,11 +12,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -30,6 +31,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -67,7 +70,6 @@ class OrderControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "1", authorities = {"ROLE_USER"})
     void createOrder_shouldCreateOrder_whenUserServiceReturnsUser() throws Exception {
         // given - Mock User Service response
         UserInfoResponse userInfo = new UserInfoResponse();
@@ -98,6 +100,8 @@ class OrderControllerIntegrationTest {
 
         // when & then
         mockMvc.perform(post("/api/orders")
+                        .with(asUser(1))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createOrderJson))
                 .andExpect(status().isCreated())
@@ -108,7 +112,6 @@ class OrderControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "1", authorities = {"ROLE_USER"})
     void getOrderById_shouldReturnOrder_whenOrderExistsAndUserIsOwner() throws Exception {
         // First create an order
         UserInfoResponse userInfo = new UserInfoResponse();
@@ -138,6 +141,8 @@ class OrderControllerIntegrationTest {
             """;
 
         String response = mockMvc.perform(post("/api/orders")
+                        .with(asUser(1))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createOrderJson))
                 .andExpect(status().isCreated())
@@ -148,25 +153,25 @@ class OrderControllerIntegrationTest {
         String orderId = objectMapper.readTree(response).get("order").get("id").asText();
 
         // when & then - Get the order
-        mockMvc.perform(get("/api/orders/{id}", orderId))
+        mockMvc.perform(get("/api/orders/{id}", orderId)
+                        .with(asUser(1)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.order.id").value(orderId))
                 .andExpect(jsonPath("$.order.status").value("PENDING"));
     }
 
     @Test
-    @WithMockUser(username = "1", authorities = {"ROLE_USER"})
     void getOrderById_shouldReturn403_whenUserIsNotOwner() throws Exception {
         // Create order for different user (admin can do this)
         // This test would need admin setup - simplified here
         String differentOrderId = "550e8400-e29b-41d4-a716-446655440000";
 
-        mockMvc.perform(get("/api/orders/{id}", differentOrderId))
+        mockMvc.perform(get("/api/orders/{id}", differentOrderId)
+                        .with(asUser(1)))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    @WithMockUser(username = "1", authorities = {"ROLE_USER"})
     void getAllOrders_shouldReturnOnlyUserOrders() throws Exception {
         // given - Create multiple orders for user 1
         UserInfoResponse userInfo = new UserInfoResponse();
@@ -197,17 +202,22 @@ class OrderControllerIntegrationTest {
 
         // Create two orders
         mockMvc.perform(post("/api/orders")
+                        .with(asUser(1))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createOrderJson))
                 .andExpect(status().isCreated());
 
         mockMvc.perform(post("/api/orders")
+                        .with(asUser(1))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createOrderJson))
                 .andExpect(status().isCreated());
 
         // when & then
         mockMvc.perform(get("/api/orders")
+                        .with(asUser(1))
                         .param("page", "0")
                         .param("size", "10"))
                 .andExpect(status().isOk())
@@ -216,7 +226,6 @@ class OrderControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "admin", authorities = {"ROLE_ADMIN"})
     void getAllOrdersAsAdmin_shouldReturnAllOrders() throws Exception {
         // given
         UserInfoResponse userInfo = new UserInfoResponse();
@@ -235,13 +244,13 @@ class OrderControllerIntegrationTest {
 
         // when & then
         mockMvc.perform(get("/api/orders")
+                        .with(asAdmin())
                         .param("page", "0")
                         .param("size", "10"))
                 .andExpect(status().isOk());
     }
 
     @Test
-    @WithMockUser(username = "1", authorities = {"ROLE_USER"})
     void getOrdersWithFilter_shouldApplyActiveFilter() throws Exception {
         // given
         UserInfoResponse userInfo = new UserInfoResponse();
@@ -271,12 +280,15 @@ class OrderControllerIntegrationTest {
             """;
 
         mockMvc.perform(post("/api/orders")
+                        .with(asUser(1))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createOrderJson))
                 .andExpect(status().isCreated());
 
         // when & then - Filter by active=true
         mockMvc.perform(get("/api/orders/filtered")
+                        .with(asUser(1))
                         .param("active", "true")
                         .param("page", "0")
                         .param("size", "10"))
@@ -285,7 +297,6 @@ class OrderControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "1", authorities = {"ROLE_USER"})
     void userServiceCircuitBreaker_shouldReturnFallback_whenUserServiceIsDown() throws Exception {
         // given - User Service returns error (simulating Circuit Breaker)
         stubFor(WireMock.get(urlEqualTo("/api/users/1"))
@@ -307,6 +318,8 @@ class OrderControllerIntegrationTest {
 
         // when & then - Should use fallback user response
         mockMvc.perform(post("/api/orders")
+                        .with(asUser(1))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createOrderJson))
                 .andExpect(status().isCreated())
@@ -315,7 +328,6 @@ class OrderControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "admin", authorities = {"ROLE_ADMIN"})
     void updateOrder_shouldUpdateOrder() throws Exception {
         // given - Create an order first
         UserInfoResponse userInfo = new UserInfoResponse();
@@ -345,6 +357,8 @@ class OrderControllerIntegrationTest {
             """;
 
         String response = mockMvc.perform(post("/api/orders")
+                        .with(asAdmin())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createOrderJson))
                 .andExpect(status().isCreated())
@@ -366,6 +380,8 @@ class OrderControllerIntegrationTest {
             """, orderId);
 
         mockMvc.perform(put("/api/orders")
+                        .with(asAdmin())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateOrderJson))
                 .andExpect(status().isOk())
@@ -374,7 +390,6 @@ class OrderControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "admin", authorities = {"ROLE_ADMIN"})
     void activateOrder_shouldActivateOrder() throws Exception {
         // given - Create and deactivate an order
         UserInfoResponse userInfo = new UserInfoResponse();
@@ -404,6 +419,8 @@ class OrderControllerIntegrationTest {
             """;
 
         String response = mockMvc.perform(post("/api/orders")
+                        .with(asAdmin())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createOrderJson))
                 .andExpect(status().isCreated())
@@ -414,16 +431,19 @@ class OrderControllerIntegrationTest {
         String orderId = objectMapper.readTree(response).get("order").get("id").asText();
 
         // Deactivate first
-        mockMvc.perform(delete("/api/orders/{id}", orderId))
+        mockMvc.perform(delete("/api/orders/{id}", orderId)
+                        .with(asAdmin())
+                        .with(csrf()))
                 .andExpect(status().isNoContent());
 
         // when & then - Activate the order
-        mockMvc.perform(put("/api/orders/{id}/activate", orderId))
+        mockMvc.perform(put("/api/orders/{id}/activate", orderId)
+                        .with(asAdmin())
+                        .with(csrf()))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    @WithMockUser(username = "admin", authorities = {"ROLE_ADMIN"})
     void deactivateOrder_shouldDeactivateOrder() throws Exception {
         // given - Create an order
         UserInfoResponse userInfo = new UserInfoResponse();
@@ -453,6 +473,8 @@ class OrderControllerIntegrationTest {
             """;
 
         String response = mockMvc.perform(post("/api/orders")
+                        .with(asAdmin())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createOrderJson))
                 .andExpect(status().isCreated())
@@ -463,8 +485,22 @@ class OrderControllerIntegrationTest {
         String orderId = objectMapper.readTree(response).get("order").get("id").asText();
 
         // when & then - Deactivate the order
-        mockMvc.perform(delete("/api/orders/{id}", orderId))
+        mockMvc.perform(delete("/api/orders/{id}", orderId)
+                        .with(asAdmin())
+                        .with(csrf()))
                 .andExpect(status().isNoContent());
+    }
+
+    private static RequestPostProcessor asUser(long userId) {
+        return jwt()
+                .jwt(j -> j.subject(String.valueOf(userId)))
+                .authorities(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    private static RequestPostProcessor asAdmin() {
+        return jwt()
+                .jwt(j -> j.subject("admin"))
+                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"));
     }
 
 }

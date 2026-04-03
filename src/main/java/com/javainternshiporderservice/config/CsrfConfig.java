@@ -10,7 +10,6 @@ public class CsrfConfig {
 
     @Bean
     public CsrfTokenRepository csrfTokenRepository() {
-        return new CookieCsrfTokenRepository();
+        return CookieCsrfTokenRepository.withHttpOnlyFalse();
     }
 }
-

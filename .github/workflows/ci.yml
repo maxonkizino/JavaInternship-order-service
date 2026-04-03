@@ -55,6 +55,7 @@ jobs:
       - name: Build & test
         env:
           SPRING_PROFILES_ACTIVE: test
+          JWT_TEST_SECRET: ${{ secrets.JWT_TEST_SECRET }}
         run: mvn -B clean verify
 
       - name: SonarQube analysis
