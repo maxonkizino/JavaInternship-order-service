@@ -313,4 +313,211 @@ class OrderControllerIntegrationTest {
                 .andExpect(jsonPath("$.user.name").value("Unknown"))
                 .andExpect(jsonPath("$.user.surname").value("User"));
     }
+
+    @Test
+    @WithMockUser(username = "admin", authorities = {"ROLE_ADMIN"})
+    void updateOrder_shouldUpdateOrder() throws Exception {
+        // given - Create an order first
+        UserInfoResponse userInfo = new UserInfoResponse();
+        userInfo.setId(1L);
+        userInfo.setName("John");
+        userInfo.setSurname("Doe");
+        userInfo.setEmail("john@example.com");
+        userInfo.setBirthDate(LocalDate.of(1990, 1, 1));
+        userInfo.setActive(true);
+
+        stubFor(WireMock.get(urlEqualTo("/api/users/1"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(userInfo))));
+
+        String createOrderJson = """
+            {
+                "userId": 1,
+                "status": "PENDING",
+                "totalPrice": 150.00,
+                "orderItems": [
+                    { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
+                ],
+                "active": true
+            }
+            """;
+
+        String response = mockMvc.perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createOrderJson))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String orderId = objectMapper.readTree(response).get("order").get("id").asText();
+
+        // when & then - Update the order
+        String updateOrderJson = String.format("""
+            {
+                "id": "%s",
+                "userId": 1,
+                "status": "CONFIRMED",
+                "totalPrice": 200.00,
+                "active": true
+            }
+            """, orderId);
+
+        mockMvc.perform(put("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateOrderJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.order.status").value("CONFIRMED"))
+                .andExpect(jsonPath("$.order.totalPrice").value(200.00));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", authorities = {"ROLE_ADMIN"})
+    void activateOrder_shouldActivateOrder() throws Exception {
+        // given - Create and deactivate an order
+        UserInfoResponse userInfo = new UserInfoResponse();
+        userInfo.setId(1L);
+        userInfo.setName("John");
+        userInfo.setSurname("Doe");
+        userInfo.setEmail("john@example.com");
+        userInfo.setBirthDate(LocalDate.of(1990, 1, 1));
+        userInfo.setActive(true);
+
+        stubFor(WireMock.get(urlEqualTo("/api/users/1"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(userInfo))));
+
+        String createOrderJson = """
+            {
+                "userId": 1,
+                "status": "PENDING",
+                "totalPrice": 150.00,
+                "orderItems": [
+                    { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
+                ],
+                "active": true
+            }
+            """;
+
+        String response = mockMvc.perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createOrderJson))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String orderId = objectMapper.readTree(response).get("order").get("id").asText();
+
+        // Deactivate first
+        mockMvc.perform(delete("/api/orders/{id}", orderId))
+                .andExpect(status().isNoContent());
+
+        // when & then - Activate the order
+        mockMvc.perform(put("/api/orders/{id}/activate", orderId))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", authorities = {"ROLE_ADMIN"})
+    void deactivateOrder_shouldDeactivateOrder() throws Exception {
+        // given - Create an order
+        UserInfoResponse userInfo = new UserInfoResponse();
+        userInfo.setId(1L);
+        userInfo.setName("John");
+        userInfo.setSurname("Doe");
+        userInfo.setEmail("john@example.com");
+        userInfo.setBirthDate(LocalDate.of(1990, 1, 1));
+        userInfo.setActive(true);
+
+        stubFor(WireMock.get(urlEqualTo("/api/users/1"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(userInfo))));
+
+        String createOrderJson = """
+            {
+                "userId": 1,
+                "status": "PENDING",
+                "totalPrice": 150.00,
+                "orderItems": [
+                    { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
+                ],
+                "active": true
+            }
+            """;
+
+        String response = mockMvc.perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createOrderJson))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String orderId = objectMapper.readTree(response).get("order").get("id").asText();
+
+        // when & then - Deactivate the order
+        mockMvc.perform(delete("/api/orders/{id}", orderId))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithMockUser(username = "user", authorities = {"ROLE_USER"})
+    void getOrderWithUserById_shouldReturnOrderWithUser() throws Exception {
+        // given - Create an order
+        UserInfoResponse userInfo = new UserInfoResponse();
+        userInfo.setId(1L);
+        userInfo.setName("John");
+        userInfo.setSurname("Doe");
+        userInfo.setEmail("john@example.com");
+        userInfo.setBirthDate(LocalDate.of(1990, 1, 1));
+        userInfo.setActive(true);
+
+        stubFor(WireMock.get(urlEqualTo("/api/users/1"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(userInfo))));
+
+        stubFor(WireMock.get(urlEqualTo("/api/users/by-email/john%40example.com"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(userInfo))));
+
+        String createOrderJson = """
+            {
+                "userId": 1,
+                "status": "PENDING",
+                "totalPrice": 150.00,
+                "orderItems": [
+                    { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
+                ],
+                "active": true
+            }
+            """;
+
+        String response = mockMvc.perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createOrderJson))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String orderId = objectMapper.readTree(response).get("order").get("id").asText();
+
+        // when & then - Get order with user by email
+        mockMvc.perform(get("/api/orders/{id}/with-user", orderId)
+                        .param("userEmail", "john@example.com"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.order.id").value(orderId))
+                .andExpect(jsonPath("$.user.email").value("john@example.com"));
+    }
 }
