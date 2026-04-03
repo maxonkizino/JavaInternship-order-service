@@ -18,9 +18,10 @@ public class TestJwtDecoderConfig {
 
     @Bean
     public JwtDecoder jwtDecoder(
-            @Value("${JWT_TEST_SECRET}") String jwtSecret) {
-        if (jwtSecret == null || jwtSecret.isEmpty()) {
-            throw new IllegalStateException("JWT_TEST_SECRET environment variable must be set");
+            @Value("${jwt.test-secret}") String jwtSecret) {
+        if (jwtSecret == null || jwtSecret.isBlank()) {
+            throw new IllegalStateException(
+                    "jwt.test-secret must be set (e.g. in application-test.yml or via JWT_TEST_SECRET env)");
         }
         byte[] secret = jwtSecret.getBytes(StandardCharsets.UTF_8);
         SecretKey key = new SecretKeySpec(secret, "HmacSHA256");

@@ -60,5 +60,6 @@ management:
     health:
       show-details: never
 
-# JWT test secret (for local testing, override in CI with env var)
-JWT_TEST_SECRET: test-secret-key-at-least-256-bits-long-for-hs256-xxxxxxxx
+# HS256 test key for JwtDecoder in profile "test". Override with env JWT_TEST_SECRET when set (non-empty).
+jwt:
+  test-secret: ${JWT_TEST_SECRET:test-secret-key-at-least-256-bits-long-for-hs256-xxxxxxxx}
