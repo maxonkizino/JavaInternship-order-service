@@ -149,4 +149,65 @@ class ItemControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         verify(itemService).deactivateItem(itemId);
     }
+
+    @Test
+    void getAllItems_shouldReturnEmptyPage_whenNoItems() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<ItemResponse> emptyPage = new PageImpl<>(Collections.emptyList());
+        when(itemService.getAllItems(pageable)).thenReturn(emptyPage);
+
+        ResponseEntity<Page<ItemResponse>> response = itemController.getAllItems(pageable);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getContent()).isEmpty();
+        verify(itemService).getAllItems(pageable);
+    }
+
+    @Test
+    void getItemsWithFilter_shouldHandlePartialFilters() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<ItemResponse> page = new PageImpl<>(Collections.singletonList(itemResponse));
+        when(itemService.getItemsWithFilter(true, null, null, pageable)).thenReturn(page);
+
+        ResponseEntity<Page<ItemResponse>> response = itemController.getItemsWithFilter(true, null, null, pageable);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        verify(itemService).getItemsWithFilter(true, null, null, pageable);
+    }
+
+    @Test
+    void createItem_shouldHandleInactiveItem() {
+        createItemRequest.setActive(false);
+        itemResponse.setActive(false);
+        when(itemService.createItem(createItemRequest)).thenReturn(itemResponse);
+
+        ResponseEntity<ItemResponse> response = itemController.createItem(createItemRequest);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody().isActive()).isFalse();
+    }
+
+    @Test
+    void updateItem_shouldHandlePriceUpdate() {
+        updateItemRequest.setPrice(new BigDecimal("150.00"));
+        itemResponse.setPrice(new BigDecimal("150.00"));
+        when(itemService.updateItem(updateItemRequest)).thenReturn(itemResponse);
+
+        ResponseEntity<ItemResponse> response = itemController.updateItem(updateItemRequest);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getPrice()).isEqualByComparingTo(new BigDecimal("150.00"));
+    }
+
+    @Test
+    void updateItem_shouldHandleNameUpdate() {
+        updateItemRequest.setName("New Item Name");
+        itemResponse.setName("New Item Name");
+        when(itemService.updateItem(updateItemRequest)).thenReturn(itemResponse);
+
+        ResponseEntity<ItemResponse> response = itemController.updateItem(updateItemRequest);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getName()).isEqualTo("New Item Name");
+    }
 }

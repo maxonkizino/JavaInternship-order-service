@@ -152,4 +152,54 @@ class OrderItemControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         verify(orderItemService).deactivateOrderItem(orderItemId);
     }
+
+    @Test
+    void getAllOrderItems_shouldReturnEmptyPage_whenNoItems() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<OrderItemResponse> emptyPage = new PageImpl<>(Collections.emptyList());
+        when(orderItemService.getAllOrderItems(pageable)).thenReturn(emptyPage);
+
+        ResponseEntity<Page<OrderItemResponse>> response = orderItemController.getAllOrderItems(pageable);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getContent()).isEmpty();
+        verify(orderItemService).getAllOrderItems(pageable);
+    }
+
+    @Test
+    void getOrderItemsWithFilter_shouldHandlePartialFilters() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<OrderItemResponse> page = new PageImpl<>(Collections.singletonList(orderItemResponse));
+        when(orderItemService.getOrderItemsWithFilter(null, orderId, null, pageable)).thenReturn(page);
+
+        ResponseEntity<Page<OrderItemResponse>> response = 
+                orderItemController.getOrderItemsWithFilter(null, orderId, null, pageable);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        verify(orderItemService).getOrderItemsWithFilter(null, orderId, null, pageable);
+    }
+
+    @Test
+    void createOrderItem_shouldHandleLargeQuantity() {
+        createOrderItemRequest.setQuantity(1000);
+        orderItemResponse.setQuantity(1000);
+        when(orderItemService.createOrderItem(createOrderItemRequest)).thenReturn(orderItemResponse);
+
+        ResponseEntity<OrderItemResponse> response = orderItemController.createOrderItem(createOrderItemRequest);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody().getQuantity()).isEqualTo(1000);
+    }
+
+    @Test
+    void updateOrderItem_shouldHandleZeroQuantity() {
+        updateOrderItemRequest.setQuantity(0);
+        orderItemResponse.setQuantity(0);
+        when(orderItemService.updateOrderItem(updateOrderItemRequest)).thenReturn(orderItemResponse);
+
+        ResponseEntity<OrderItemResponse> response = orderItemController.updateOrderItem(updateOrderItemRequest);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getQuantity()).isEqualTo(0);
+    }
 }
