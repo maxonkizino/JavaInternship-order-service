@@ -22,7 +22,7 @@ spring:
           enabled: false
 
 
-USER_SERVICE_URL: http://localhost:9999
+USER_SERVICE_URL: http://localhost:8081
 
 
 resilience4j:
@@ -47,7 +47,7 @@ logging:
 
 
 server:
-  port: ${SERVER_PORT:8082}
+  port: ${SERVER_PORT:8083}
   error:
     include-message: always
     include-stacktrace: on-param

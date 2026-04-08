@@ -26,13 +26,13 @@ RUN chown -R orderservice:orderservice /app
 
 USER orderservice
 
-EXPOSE 8082
+EXPOSE 8083
 
 ENV SPRING_PROFILES_ACTIVE=local
-ENV SERVER_PORT=8082
+ENV SERVER_PORT=8083
 ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:InitialRAMPercentage=50.0"
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD wget -q --spider http://localhost:8082/actuator/health || exit 1
+  CMD wget -q --spider http://localhost:8083/actuator/health || exit 1
 
 ENTRYPOINT exec java $JAVA_OPTS -jar app.jar

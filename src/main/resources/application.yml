@@ -32,7 +32,7 @@ spring:
             logger-level: basic
 
 
-USER_SERVICE_URL: ${USER_SERVICE_URL:http://localhost:8080}
+USER_SERVICE_URL: ${USER_SERVICE_URL:http://localhost:8081}
 
 
 resilience4j:
@@ -66,7 +66,7 @@ logging:
 
 
 server:
-  port: ${SERVER_PORT:8082}
+  port: ${SERVER_PORT:8083}
   error:
     whitelabel:
       enabled: false
