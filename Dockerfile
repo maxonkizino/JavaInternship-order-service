@@ -28,7 +28,7 @@ USER orderservice
 
 EXPOSE 8083
 
-ENV SPRING_PROFILES_ACTIVE=local
+ENV SPRING_PROFILES_ACTIVE=docker
 ENV SERVER_PORT=8083
 ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:InitialRAMPercentage=50.0"
 
