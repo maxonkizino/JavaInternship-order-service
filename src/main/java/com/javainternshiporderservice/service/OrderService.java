@@ -31,7 +31,7 @@ public interface OrderService {
 
     OrderWithUserResponse createOrder(CreateOrderRequest createOrderRequest);
 
-    OrderWithUserResponse updateOrder(UpdateOrderRequest updateOrderRequest);
+    OrderWithUserResponse updateOrder(UUID id, UpdateOrderRequest updateOrderRequest);
 
     void activateOrder(UUID id);
 

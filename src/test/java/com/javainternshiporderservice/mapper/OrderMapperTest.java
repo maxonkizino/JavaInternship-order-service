@@ -38,7 +38,7 @@ class OrderMapperTest {
         order.setUserId(1L);
         order.setStatus("PENDING");
         order.setTotalPrice(new BigDecimal("150.00"));
-        order.setActive(true);
+        order.setDeleted(false);
 
         OrderResponse response = orderMapper.toOrderResponse(order);
 
@@ -47,7 +47,7 @@ class OrderMapperTest {
         assertThat(response.getUserId()).isEqualTo(1L);
         assertThat(response.getStatus()).isEqualTo("PENDING");
         assertThat(response.getTotalPrice()).isEqualTo(new BigDecimal("150.00"));
-        assertThat(response.isActive()).isTrue();
+        assertThat(response.isDeleted()).isFalse();
     }
 
     @Test
@@ -62,7 +62,7 @@ class OrderMapperTest {
         request.setUserId(2L);
         request.setStatus("CONFIRMED");
         request.setTotalPrice(new BigDecimal("200.00"));
-        request.setActive(true);
+        request.setDeleted(false);
 
         CreateOrderItemRequest itemRequest = new CreateOrderItemRequest();
         itemRequest.setItemId(UUID.randomUUID());
@@ -75,7 +75,7 @@ class OrderMapperTest {
         assertThat(order.getUserId()).isEqualTo(2L);
         assertThat(order.getStatus()).isEqualTo("CONFIRMED");
         assertThat(order.getTotalPrice()).isEqualTo(new BigDecimal("200.00"));
-        assertThat(order.isActive()).isTrue();
+        assertThat(order.isDeleted()).isFalse();
         assertThat(order.getOrderItems()).hasSize(1);
     }
 

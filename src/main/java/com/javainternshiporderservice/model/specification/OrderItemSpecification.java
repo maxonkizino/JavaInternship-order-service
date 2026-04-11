@@ -11,9 +11,7 @@ import java.util.UUID;
  */
 public class OrderItemSpecification {
 
-    private OrderItemSpecification() {
-        // Private constructor to prevent instantiation
-    }
+    private OrderItemSpecification() {}
 
     /**
      * Creates a specification to filter order items by ID.

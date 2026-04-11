@@ -41,7 +41,6 @@ public class ProfileConfig {
                     Arrays.toString(activeProfiles));
         }
 
-        // Log important configuration warnings for production
         if (isProfileActive("prod")) {
             log.info("Running in PRODUCTION mode");
         } else if (isProfileActive("local")) {

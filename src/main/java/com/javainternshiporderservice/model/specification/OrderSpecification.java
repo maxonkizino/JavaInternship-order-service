@@ -15,9 +15,7 @@ public class OrderSpecification {
 
     private static final String CREATED_AT = "createdAt";
 
-    private OrderSpecification() {
-        // Private constructor to prevent instantiation
-    }
+    private OrderSpecification() {}
 
     /**
      * Creates a specification to filter orders by ID.
@@ -92,25 +90,23 @@ public class OrderSpecification {
     }
 
     /**
-     * Creates a specification to filter only active orders.
+     * Creates a specification to filter only non-deleted orders.
      *
-     * @return Specification matching orders where active = true
+     * @return Specification matching orders where deleted = false
      */
     public static Specification<Order> isActive() {
-        return (root, query, cb) -> cb.isTrue(root.get("active"));
+        return (root, query, cb) -> cb.isFalse(root.get("deleted"));
     }
 
     /**
-     * Creates a specification to filter orders by active status.
-     * Supports both true and false values.
+     * Filters by "active" in API terms: {@code true} = not deleted, {@code false} = soft-deleted.
      *
-     * @param active the active status to filter by, null returns null (no filter)
-     * @return Specification matching orders with the given active status
+     * @param active null means no filter
      */
     public static Specification<Order> hasActive(Boolean active) {
         return (root, query, cb) ->
                 active == null ? null :
-                        cb.equal(root.get("active"), active);
+                        cb.equal(root.get("deleted"), !active);
     }
 
 }

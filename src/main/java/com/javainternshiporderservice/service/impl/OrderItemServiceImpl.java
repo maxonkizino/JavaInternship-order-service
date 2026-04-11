@@ -28,6 +28,7 @@ public class OrderItemServiceImpl implements OrderItemService {
     private final OrderItemRepository orderItemRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public OrderItemResponse getOrderItemById(UUID id) {
         Specification<OrderItem> spec = Specification
             .where(OrderItemSpecification.hasId(id))
@@ -41,6 +42,7 @@ public class OrderItemServiceImpl implements OrderItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public OrderItemResponse getOrderItemByOrderId(UUID orderId) {
         Specification<OrderItem> spec = Specification
             .where(OrderItemSpecification.hasOrderId(orderId))
@@ -56,6 +58,7 @@ public class OrderItemServiceImpl implements OrderItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public OrderItemResponse getOrderItemByItemId(UUID itemId) {
 
         Specification<OrderItem> spec = Specification
@@ -72,6 +75,7 @@ public class OrderItemServiceImpl implements OrderItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<OrderItemResponse> getAllOrderItems(Pageable pageable) {
         Specification<OrderItem> spec = Specification
             .where(OrderItemSpecification.isActive());
@@ -82,6 +86,7 @@ public class OrderItemServiceImpl implements OrderItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<OrderItemResponse> getOrderItemsWithFilter(
             Boolean active,
             UUID orderId,

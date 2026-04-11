@@ -13,6 +13,7 @@ import com.javainternshiporderservice.model.Order;
 import com.javainternshiporderservice.model.OrderItem;
 import com.javainternshiporderservice.model.specification.OrderSpecification;
 import com.javainternshiporderservice.repository.ItemRepository;
+import com.javainternshiporderservice.repository.OrderItemRepository;
 import com.javainternshiporderservice.repository.OrderRepository;
 import com.javainternshiporderservice.security.SecurityUtils;
 import com.javainternshiporderservice.service.OrderService;
@@ -46,16 +47,22 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
     private final OrderWithUserAssembler orderWithUserAssembler;
     private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
     private final ItemRepository itemRepository;
     private final UserServiceClient userServiceClient;
     private final SecurityUtils securityUtils;
+
+    private OrderWithUserResponse assembleWithUser(Order order) {
+        UserInfoResponse userInfo = userServiceClient.fetchUserById(order.getUserId());
+        return orderWithUserAssembler.assemble(order, userInfo);
+    }
 
     @Override
     @Transactional(readOnly = true)
     public OrderWithUserResponse getOrderById(UUID id) {
         Specification<Order> spec = Specification
-            .where(OrderSpecification.hasId(id))
-            .and(OrderSpecification.isActive());
+                .where(OrderSpecification.hasId(id))
+                .and(OrderSpecification.isActive());
 
         Order order = orderRepository
                 .findOne(spec)
@@ -65,8 +72,7 @@ public class OrderServiceImpl implements OrderService {
             throw new AccessDeniedException(ACCESS_DENIED_TO_ORDER + id);
         }
 
-        UserInfoResponse userInfo = userServiceClient.fetchUserById(order.getUserId());
-        return orderWithUserAssembler.assemble(order, userInfo);
+        return assembleWithUser(order);
     }
 
     @Override
@@ -77,22 +83,20 @@ public class OrderServiceImpl implements OrderService {
         }
 
         Specification<Order> spec = Specification
-            .where(OrderSpecification.hasUserId(userId))
-            .and(OrderSpecification.isActive());
+                .where(OrderSpecification.hasUserId(userId))
+                .and(OrderSpecification.isActive());
 
         Order order = orderRepository
                 .findOne(spec)
                 .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + " with userId: " + userId));
 
-        UserInfoResponse userInfo = userServiceClient.fetchUserById(order.getUserId());
-        return orderWithUserAssembler.assemble(order, userInfo);
+        return assembleWithUser(order);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<OrderWithUserResponse> getAllOrders(Pageable pageable) {
         Specification<Order> spec = Specification.where(OrderSpecification.isActive());
-
 
         if (!securityUtils.isCurrentUserAdmin()) {
             Long currentUserId = securityUtils.getCurrentUserId();
@@ -102,10 +106,7 @@ public class OrderServiceImpl implements OrderService {
         Page<Order> orders = orderRepository.findAll(spec, pageable);
 
         List<OrderWithUserResponse> content = orders.getContent().stream()
-                .map(order -> {
-                    UserInfoResponse userInfo = userServiceClient.fetchUserById(order.getUserId());
-                    return orderWithUserAssembler.assemble(order, userInfo);
-                })
+                .map(this::assembleWithUser)
                 .toList();
 
         return new PageImpl<>(content, orders.getPageable(), orders.getTotalElements());
@@ -122,7 +123,6 @@ public class OrderServiceImpl implements OrderService {
             Long userId,
             Pageable pageable) {
 
-
         Long effectiveUserId = userId;
         if (!securityUtils.isCurrentUserAdmin()) {
             Long currentUserId = securityUtils.getCurrentUserId();
@@ -132,11 +132,14 @@ public class OrderServiceImpl implements OrderService {
             effectiveUserId = currentUserId;
         }
 
-        Specification<Order> spec = (root, query, cb) -> null;
+        Specification<Order> spec = (root, query, cb) -> cb.conjunction();
 
         if (active != null) {
             spec = spec.and(OrderSpecification.hasActive(active));
+        } else {
+            spec = spec.and(OrderSpecification.isActive());
         }
+
         if (status != null) {
             spec = spec.and(OrderSpecification.hasStatus(status));
         }
@@ -153,10 +156,7 @@ public class OrderServiceImpl implements OrderService {
         Page<Order> orders = orderRepository.findAll(spec, pageable);
 
         List<OrderWithUserResponse> content = orders.getContent().stream()
-                .map(order -> {
-                    UserInfoResponse userInfo = userServiceClient.fetchUserById(order.getUserId());
-                    return orderWithUserAssembler.assemble(order, userInfo);
-                })
+                .map(this::assembleWithUser)
                 .toList();
 
         return new PageImpl<>(content, orders.getPageable(), orders.getTotalElements());
@@ -165,7 +165,6 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderWithUserResponse createOrder(CreateOrderRequest createOrderRequest) {
-        // Regular users can only create orders for themselves
         if (!securityUtils.isCurrentUserAdmin()) {
             Long currentUserId = securityUtils.getCurrentUserId();
             if (!createOrderRequest.getUserId().equals(currentUserId)) {
@@ -184,22 +183,28 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         Order createdOrder = orderRepository.save(order);
-        UserInfoResponse userInfo = userServiceClient.fetchUserById(createdOrder.getUserId());
-        return orderWithUserAssembler.assemble(createdOrder, userInfo);
+        return assembleWithUser(createdOrder);
     }
 
     @Override
     @Transactional
-    public OrderWithUserResponse updateOrder(UpdateOrderRequest updateOrderRequest) {
+    public OrderWithUserResponse updateOrder(UUID id, UpdateOrderRequest updateOrderRequest) {
+        if (updateOrderRequest.getId() != null && !updateOrderRequest.getId().equals(id)) {
+            throw new IllegalArgumentException("Order id in request body must match id in path");
+        }
+        updateOrderRequest.setId(id);
+
+        Specification<Order> loadSpec = Specification
+                .where(OrderSpecification.hasId(id))
+                .and(OrderSpecification.isActive());
         Order order = orderRepository
-            .findById(updateOrderRequest.getId())
-            .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + WITH_ID + updateOrderRequest.getId()));
+            .findOne(loadSpec)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + WITH_ID + id));
 
         if (!securityUtils.isOwnerOrAdmin(order.getUserId())) {
-            throw new AccessDeniedException(ACCESS_DENIED_UPDATE_ORDER + updateOrderRequest.getId());
+            throw new AccessDeniedException(ACCESS_DENIED_UPDATE_ORDER + id);
         }
 
-        // Regular users cannot change the order's userId
         if (!securityUtils.isCurrentUserAdmin() && updateOrderRequest.getUserId() != null) {
                 throw new AccessDeniedException(ACCESS_DENIED_CHANGE_OWNER);
         }
@@ -207,8 +212,7 @@ public class OrderServiceImpl implements OrderService {
         orderMapper.updateOrder(updateOrderRequest, order);
 
         Order updatedOrder = orderRepository.save(order);
-        UserInfoResponse userInfo = userServiceClient.fetchUserById(updatedOrder.getUserId());
-        return orderWithUserAssembler.assemble(updatedOrder, userInfo);
+        return assembleWithUser(updatedOrder);
     }
 
     @Override
@@ -222,12 +226,16 @@ public class OrderServiceImpl implements OrderService {
         }
 
         orderRepository.activateOrder(id);
+        orderItemRepository.activateByOrderId(id);
     }
 
     @Override
     @Transactional
     public void deactivateOrder(UUID id) {
-        Order order = orderRepository.findById(id)
+        Specification<Order> loadSpec = Specification
+                .where(OrderSpecification.hasId(id))
+                .and(OrderSpecification.isActive());
+        Order order = orderRepository.findOne(loadSpec)
             .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + WITH_ID + id));
 
         if (!securityUtils.isOwnerOrAdmin(order.getUserId())) {
@@ -235,13 +243,17 @@ public class OrderServiceImpl implements OrderService {
         }
 
         orderRepository.deactivateOrder(id);
+        orderItemRepository.deactivateByOrderId(id);
     }
 
     @Override
     @Transactional(readOnly = true)
     public OrderWithUserResponse getOrderWithUserById(UUID orderId, String userEmail) {
+        Specification<Order> spec = Specification
+                .where(OrderSpecification.hasId(orderId))
+                .and(OrderSpecification.isActive());
         Order order = orderRepository
-                .findById(orderId)
+                .findOne(spec)
                 .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + WITH_ID + orderId));
 
         if (!securityUtils.isOwnerOrAdmin(order.getUserId())) {

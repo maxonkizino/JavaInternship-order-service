@@ -29,6 +29,7 @@ public class CreateOrderRequest {
     @Valid
     private List<CreateOrderItemRequest> orderItems;
 
-    private boolean active = true;
+    /** Soft-delete: {@code false} for a new live order (DB column {@code deleted}). */
+    private boolean deleted = false;
 
 }

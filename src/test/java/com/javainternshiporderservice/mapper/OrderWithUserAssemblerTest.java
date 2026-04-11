@@ -106,14 +106,14 @@ class OrderWithUserAssemblerTest {
         fullOrderResponse.setUserId(5L);
         fullOrderResponse.setStatus("CONFIRMED");
         fullOrderResponse.setTotalPrice(new BigDecimal("250.00"));
-        fullOrderResponse.setActive(true);
+        fullOrderResponse.setDeleted(false);
 
         Order fullOrder = new Order();
         fullOrder.setId(orderId);
         fullOrder.setUserId(5L);
         fullOrder.setStatus("CONFIRMED");
         fullOrder.setTotalPrice(new BigDecimal("250.00"));
-        fullOrder.setActive(true);
+        fullOrder.setDeleted(false);
 
         when(orderMapper.toOrderResponse(fullOrder)).thenReturn(fullOrderResponse);
 
@@ -123,7 +123,7 @@ class OrderWithUserAssemblerTest {
         assertThat(result.getOrder().getUserId()).isEqualTo(5L);
         assertThat(result.getOrder().getStatus()).isEqualTo("CONFIRMED");
         assertThat(result.getOrder().getTotalPrice()).isEqualTo(new BigDecimal("250.00"));
-        assertThat(result.getOrder().isActive()).isTrue();
+        assertThat(result.getOrder().isDeleted()).isFalse();
     }
 
     @Test

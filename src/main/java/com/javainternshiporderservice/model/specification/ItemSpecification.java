@@ -12,9 +12,7 @@ import java.util.UUID;
  */
 public class ItemSpecification {
 
-    private ItemSpecification() {
-        // Private constructor to prevent instantiation
-    }
+    private ItemSpecification() {}
 
     /**
      * Creates a specification to filter items by ID.

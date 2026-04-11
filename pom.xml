@@ -20,6 +20,7 @@
 
     <properties>
         <java.version>21</java.version>
+        <maven.compiler.release>21</maven.compiler.release>
         <!-- Align with Docker Desktop / docker-java; helps Windows npipe + API quirks -->
         <testcontainers.version>1.21.4</testcontainers.version>
     </properties>
@@ -197,6 +198,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
+                    <release>${maven.compiler.release}</release>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.mapstruct</groupId>

@@ -9,6 +9,7 @@ import com.javainternshiporderservice.exception.OrderNotFoundException;
 import com.javainternshiporderservice.mapper.OrderMapper;
 import com.javainternshiporderservice.mapper.OrderWithUserAssembler;
 import com.javainternshiporderservice.model.Order;
+import com.javainternshiporderservice.repository.OrderItemRepository;
 import com.javainternshiporderservice.repository.OrderRepository;
 import com.javainternshiporderservice.security.SecurityUtils;
 import com.javainternshiporderservice.service.impl.OrderServiceImpl;
@@ -48,6 +49,9 @@ class OrderServiceImplTest {
     private OrderRepository orderRepository;
 
     @Mock
+    private OrderItemRepository orderItemRepository;
+
+    @Mock
     private UserServiceClient userServiceClient;
 
     @Mock
@@ -71,7 +75,7 @@ class OrderServiceImplTest {
         order.setUserId(userId);
         order.setStatus("PENDING");
         order.setTotalPrice(new BigDecimal("100.00"));
-        order.setActive(true);
+        order.setDeleted(false);
 
         userInfoResponse = new UserInfoResponse();
         userInfoResponse.setId(userId);
@@ -254,7 +258,7 @@ class OrderServiceImplTest {
         request.setId(orderId);
         request.setStatus("CONFIRMED");
 
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderRepository.findOne(any(Specification.class))).thenReturn(Optional.of(order));
         when(securityUtils.isOwnerOrAdmin(userId)).thenReturn(true);
         when(securityUtils.isCurrentUserAdmin()).thenReturn(false);
         when(orderRepository.save(order)).thenReturn(order);
@@ -262,7 +266,7 @@ class OrderServiceImplTest {
         when(orderWithUserAssembler.assemble(order, userInfoResponse)).thenReturn(orderWithUserResponse);
 
         // when
-        OrderWithUserResponse result = orderService.updateOrder(request);
+        OrderWithUserResponse result = orderService.updateOrder(orderId, request);
 
         // then
         assertThat(result).isEqualTo(orderWithUserResponse);
@@ -272,7 +276,7 @@ class OrderServiceImplTest {
     @Test
     void deactivateOrder_shouldDeactivate_whenUserIsOwner() {
         // given
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderRepository.findOne(any(Specification.class))).thenReturn(Optional.of(order));
         when(securityUtils.isOwnerOrAdmin(userId)).thenReturn(true);
 
         // when
@@ -280,12 +284,13 @@ class OrderServiceImplTest {
 
         // then
         verify(orderRepository).deactivateOrder(orderId);
+        verify(orderItemRepository).deactivateByOrderId(orderId);
     }
 
     @Test
     void deactivateOrder_shouldThrowAccessDenied_whenUserIsNotOwner() {
         // given
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderRepository.findOne(any(Specification.class))).thenReturn(Optional.of(order));
         when(securityUtils.isOwnerOrAdmin(userId)).thenReturn(false);
 
         // when & then

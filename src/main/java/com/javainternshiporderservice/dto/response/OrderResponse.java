@@ -14,7 +14,8 @@ public class OrderResponse {
     private Long userId;
     private String status;
     private BigDecimal totalPrice;
-    private boolean active;
+    /** Soft-delete flag: {@code true} if the order is deleted. */
+    private boolean deleted;
     private Instant createdAt;
     private Instant updatedAt;
     private List<OrderItemResponse> orderItems;

@@ -6,7 +6,6 @@ import com.javainternshiporderservice.dto.response.OrderWithUserResponse;
 import com.javainternshiporderservice.service.OrderService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,9 +35,9 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    @GetMapping("/filtered")
+    @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<Page<OrderWithUserResponse>> getOrdersWithFilter(
+    public ResponseEntity<Page<OrderWithUserResponse>> getOrders(
             @RequestParam(required = false) Boolean active,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) List<String> statuses,
@@ -46,39 +45,39 @@ public class OrderController {
             @RequestParam(required = false) Instant createdAtTo,
             @RequestParam(required = false) Long userId,
             Pageable pageable) {
-        Page<OrderWithUserResponse> orders = orderService.getOrdersWithFilter(
-                active, status, statuses, createdAtFrom, createdAtTo, userId, pageable);
+        if (hasFilterParams(active, status, statuses, createdAtFrom, createdAtTo, userId)) {
+            Page<OrderWithUserResponse> orders = orderService.getOrdersWithFilter(
+                    active, status, statuses, createdAtFrom, createdAtTo, userId, pageable);
+            return ResponseEntity.ok(orders);
+        }
+        Page<OrderWithUserResponse> orders = orderService.getAllOrders(pageable);
         return ResponseEntity.ok(orders);
+    }
+
+    private static boolean hasFilterParams(
+            Boolean active,
+            String status,
+            List<String> statuses,
+            Instant createdAtFrom,
+            Instant createdAtTo,
+            Long userId) {
+        return active != null
+                || status != null
+                || (statuses != null && !statuses.isEmpty())
+                || createdAtFrom != null
+                || createdAtTo != null
+                || userId != null;
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<OrderWithUserResponse> getOrderById(@PathVariable UUID id) {
-        OrderWithUserResponse order = orderService.getOrderById(id);
-        return ResponseEntity.ok(order);
-    }
-
-    @GetMapping("/{id}/with-user")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<OrderWithUserResponse> getOrderWithUserById(
+    public ResponseEntity<OrderWithUserResponse> getOrderById(
             @PathVariable UUID id,
-            @RequestParam @NotNull @Email String userEmail) {
-        OrderWithUserResponse response = orderService.getOrderWithUserById(id, userEmail);
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/by-user/{userId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<OrderWithUserResponse> getOrderByUserId(@PathVariable Long userId) {
-        OrderWithUserResponse order = orderService.getOrderByUserId(userId);
-        return ResponseEntity.ok(order);
-    }
-
-    @GetMapping
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<Page<OrderWithUserResponse>> getAllOrders(Pageable pageable) {
-        Page<OrderWithUserResponse> orders = orderService.getAllOrders(pageable);
-        return ResponseEntity.ok(orders);
+            @RequestParam(required = false) @Email String userEmail) {
+        if (userEmail != null && !userEmail.isBlank()) {
+            return ResponseEntity.ok(orderService.getOrderWithUserById(id, userEmail));
+        }
+        return ResponseEntity.ok(orderService.getOrderById(id));
     }
 
     @PostMapping
@@ -89,11 +88,12 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<OrderWithUserResponse> updateOrder(
+            @PathVariable UUID id,
             @Valid @RequestBody UpdateOrderRequest updateOrderRequest) {
-        OrderWithUserResponse updatedOrder = orderService.updateOrder(updateOrderRequest);
+        OrderWithUserResponse updatedOrder = orderService.updateOrder(id, updateOrderRequest);
         return ResponseEntity.ok(updatedOrder);
     }
 

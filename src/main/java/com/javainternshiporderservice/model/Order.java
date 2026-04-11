@@ -2,6 +2,7 @@ package com.javainternshiporderservice.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.SQLDelete;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "orders")
+@SQLDelete(sql = "UPDATE orders SET deleted = true WHERE id = ?")
 @Data
 public class Order extends BaseAuditingEntity{
 
@@ -28,7 +30,7 @@ public class Order extends BaseAuditingEntity{
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderItem> orderItems;
 
-    @Column(name = "active", nullable = false)
-    private boolean active = true;
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
 
 }

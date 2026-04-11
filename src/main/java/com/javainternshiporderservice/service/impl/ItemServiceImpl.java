@@ -32,6 +32,7 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public ItemResponse getItemById(UUID id) {
         Specification<Item> spec = Specification
             .where(ItemSpecification.hasId(id))
@@ -45,6 +46,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ItemResponse getItemByName(String name) {
         Specification<Item> spec = Specification
             .where(ItemSpecification.hasName(name))
@@ -58,6 +60,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<ItemResponse> getAllItems(Pageable pageable) {
         Specification<Item> spec = Specification
             .where(ItemSpecification.isActive());
@@ -68,6 +71,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<ItemResponse> getItemsWithFilter(
             Boolean active,
             String name,

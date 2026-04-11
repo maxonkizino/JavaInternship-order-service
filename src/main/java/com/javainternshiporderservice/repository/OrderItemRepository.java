@@ -36,4 +36,12 @@ public interface OrderItemRepository extends
     @Query("UPDATE OrderItem oi SET oi.active = false WHERE oi.id = :id")
     void deactivateOrderItem(@Param("id") UUID id);
 
+    @Modifying
+    @Query("UPDATE OrderItem oi SET oi.active = false WHERE oi.order.id = :orderId")
+    void deactivateByOrderId(@Param("orderId") UUID orderId);
+
+    @Modifying
+    @Query("UPDATE OrderItem oi SET oi.active = true WHERE oi.order.id = :orderId")
+    void activateByOrderId(@Param("orderId") UUID orderId);
+
 }

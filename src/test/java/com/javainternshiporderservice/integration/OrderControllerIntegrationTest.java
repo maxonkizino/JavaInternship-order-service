@@ -92,7 +92,7 @@ class OrderControllerIntegrationTest {
                 "orderItems": [
                     { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
                 ],
-                "active": true
+                "deleted": false
             }
             """;
 
@@ -134,7 +134,7 @@ class OrderControllerIntegrationTest {
                 "orderItems": [
                     { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
                 ],
-                "active": true
+                "deleted": false
             }
             """;
 
@@ -194,7 +194,7 @@ class OrderControllerIntegrationTest {
                 "orderItems": [
                     { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
                 ],
-                "active": true
+                "deleted": false
             }
             """;
 
@@ -273,7 +273,7 @@ class OrderControllerIntegrationTest {
                 "orderItems": [
                     { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
                 ],
-                "active": true
+                "deleted": false
             }
             """;
 
@@ -285,7 +285,7 @@ class OrderControllerIntegrationTest {
                 .andExpect(status().isCreated());
 
         // when & then - Filter by active=true
-        mockMvc.perform(get("/api/orders/filtered")
+        mockMvc.perform(get("/api/orders")
                         .with(asUser(1))
                         .param("active", "true")
                         .param("page", "0")
@@ -310,7 +310,7 @@ class OrderControllerIntegrationTest {
                 "orderItems": [
                     { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
                 ],
-                "active": true
+                "deleted": false
             }
             """;
 
@@ -350,7 +350,7 @@ class OrderControllerIntegrationTest {
                 "orderItems": [
                     { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
                 ],
-                "active": true
+                "deleted": false
             }
             """;
 
@@ -372,12 +372,11 @@ class OrderControllerIntegrationTest {
                 "id": "%s",
                 "userId": 1,
                 "status": "CONFIRMED",
-                "totalPrice": 200.00,
-                "active": true
+                "totalPrice": 200.00
             }
             """, orderId);
 
-        mockMvc.perform(put("/api/orders")
+        mockMvc.perform(put("/api/orders/{id}", orderId)
                         .with(asAdmin())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -412,7 +411,7 @@ class OrderControllerIntegrationTest {
                 "orderItems": [
                     { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
                 ],
-                "active": true
+                "deleted": false
             }
             """;
 
@@ -466,7 +465,7 @@ class OrderControllerIntegrationTest {
                 "orderItems": [
                     { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
                 ],
-                "active": true
+                "deleted": false
             }
             """;
 
