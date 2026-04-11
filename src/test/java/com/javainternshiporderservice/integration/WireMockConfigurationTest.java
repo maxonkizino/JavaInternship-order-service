@@ -156,9 +156,8 @@ class WireMockConfigurationTest {
         RestTemplate shortTimeout = createRestTemplate();
         shortTimeout.setRequestFactory(factory);
 
-        assertThatThrownBy(() -> shortTimeout.getForEntity(
-                        "http://localhost:" + wireMockServer.port() + "/api/users/" + userId,
-                        String.class))
+        String url = "http://localhost:" + wireMockServer.port() + "/api/users/" + userId;
+        assertThatThrownBy(() -> shortTimeout.getForEntity(url, String.class))
                 .isInstanceOf(ResourceAccessException.class);
     }
 }
