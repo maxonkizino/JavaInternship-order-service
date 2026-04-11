@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -106,6 +108,23 @@ class OrderControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(page);
         verify(orderService).getOrdersWithFilter(true, "PENDING", statuses, from, to, userId, pageable);
+    }
+
+    @Test
+    void getOrders_shouldDelegateToFilter_whenActiveFalse() {
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<OrderWithUserResponse> page = new PageImpl<>(Collections.singletonList(orderResponse));
+
+        when(orderService.getOrdersWithFilter(eq(false), isNull(), isNull(), isNull(), isNull(), isNull(), eq(pageable)))
+                .thenReturn(page);
+
+        ResponseEntity<Page<OrderWithUserResponse>> response = orderController.getOrders(
+                false, null, null, null, null, null, pageable);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(page);
+        verify(orderService).getOrdersWithFilter(false, null, null, null, null, null, pageable);
+        verify(orderService, never()).getAllOrders(any());
     }
 
     @Test

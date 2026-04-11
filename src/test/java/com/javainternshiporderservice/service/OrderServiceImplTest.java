@@ -274,6 +274,57 @@ class OrderServiceImplTest {
     }
 
     @Test
+    void activateOrder_shouldCallRepositories_whenUserIsOwner() {
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(securityUtils.isOwnerOrAdmin(userId)).thenReturn(true);
+
+        orderService.activateOrder(orderId);
+
+        verify(orderRepository).activateOrder(orderId);
+        verify(orderItemRepository).activateByOrderId(orderId);
+    }
+
+    @Test
+    void activateOrder_shouldThrowAccessDenied_whenUserIsNotOwner() {
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(securityUtils.isOwnerOrAdmin(userId)).thenReturn(false);
+
+        assertThatThrownBy(() -> orderService.activateOrder(orderId))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessageContaining("cannot activate order");
+    }
+
+    @Test
+    void activateOrder_shouldThrowOrderNotFound_whenOrderMissing() {
+        when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> orderService.activateOrder(orderId))
+                .isInstanceOf(OrderNotFoundException.class)
+                .hasMessageContaining("Order not found with id: " + orderId);
+    }
+
+    @Test
+    void getOrdersWithFilter_shouldReturnSoftDeleted_whenActiveIsFalse() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Order deleted = new Order();
+        deleted.setId(orderId);
+        deleted.setUserId(userId);
+        deleted.setDeleted(true);
+        Page<Order> orderPage = new PageImpl<>(Collections.singletonList(deleted));
+
+        when(securityUtils.isCurrentUserAdmin()).thenReturn(true);
+        when(orderRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(orderPage);
+        when(userServiceClient.fetchUserById(userId)).thenReturn(userInfoResponse);
+        when(orderWithUserAssembler.assemble(deleted, userInfoResponse)).thenReturn(orderWithUserResponse);
+
+        Page<OrderWithUserResponse> result = orderService.getOrdersWithFilter(
+                false, null, null, null, null, null, pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        verify(orderRepository).findAll(any(Specification.class), eq(pageable));
+    }
+
+    @Test
     void deactivateOrder_shouldDeactivate_whenUserIsOwner() {
         // given
         when(orderRepository.findOne(any(Specification.class))).thenReturn(Optional.of(order));

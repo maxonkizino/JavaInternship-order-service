@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -42,5 +43,17 @@ class UserOrderControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(orderResponse);
         verify(orderService).getOrderByUserId(userId);
+    }
+
+    @Test
+    void getOrderForUser_shouldUsePathUserId() {
+        Long otherUserId = 42L;
+        when(orderService.getOrderByUserId(otherUserId)).thenReturn(orderResponse);
+
+        ResponseEntity<OrderWithUserResponse> response = userOrderController.getOrderForUser(otherUserId);
+
+        assertThat(response.getBody()).isEqualTo(orderResponse);
+        verify(orderService).getOrderByUserId(otherUserId);
+        verify(orderService, never()).getOrderByUserId(userId);
     }
 }
