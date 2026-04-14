@@ -59,7 +59,8 @@ public class OrderServiceImpl implements OrderService {
         boolean sameUser = currentUserId != null && ownerId.equals(currentUserId);
         if (sameUser && jwtEmail != null && !jwtEmail.isBlank()) {
             UserInfoResponse userInfo = userServiceClient.fetchUserByEmail(jwtEmail);
-            if (!userInfo.getId().equals(ownerId)) {
+            Long fetchedUserId = userInfo.getId();
+            if (fetchedUserId != null && !fetchedUserId.equals(ownerId)) {
                 throw new AccessDeniedException("Token email does not match order owner");
             }
             return userInfo;

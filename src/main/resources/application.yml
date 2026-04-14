@@ -32,7 +32,7 @@ spring:
             logger-level: basic
 
 
-USER_SERVICE_URL: ${USER_SERVICE_URL:http://localhost:8081}
+USER_SERVICE_URL: ${USER_SERVICE_BASE_URL:http://localhost:8081}
 
 
 resilience4j:
