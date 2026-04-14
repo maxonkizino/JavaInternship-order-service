@@ -55,13 +55,11 @@ jobs:
       - name: Build & test
         env:
           SPRING_PROFILES_ACTIVE: test
-          # If the repo secret is missing, GHA sets an empty string — that would override YAML and break the context.
-          # Use a non-empty fallback so CI always passes; optional repo secret still overrides when configured.
           JWT_TEST_SECRET: ${{ secrets.JWT_TEST_SECRET != '' && secrets.JWT_TEST_SECRET || 'test-secret-key-at-least-256-bits-long-for-hs256-xxxxxxxx' }}
         run: mvn -B clean verify
 
       - name: SonarQube analysis
-        if: ${{ secrets.SONAR_TOKEN != '' && secrets.SONAR_HOST_URL != '' && secrets.SONAR_PROJECT_KEY != '' }}
+       
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: >
