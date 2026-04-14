@@ -1,7 +1,9 @@
 spring:
   datasource:
-    url: jdbc:tc:postgresql:16-alpine:///order_service_test?user=postgres&password=postgres
-    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    url: ${DB_URL:jdbc:tc:postgresql:16-alpine:///order_service_test?user=postgres&password=postgres}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: ${DB_DRIVER:org.testcontainers.jdbc.ContainerDatabaseDriver}
   jpa:
     hibernate:
       ddl-auto: none
@@ -16,7 +18,7 @@ spring:
         jwt:
           enabled: false
 
-USER_SERVICE_URL: http://localhost:8080
+USER_SERVICE_URL: ${USER_SERVICE_URL:http://localhost:8080}
 
 spring.cloud.openfeign.client.config.default.connectTimeout: 1000
 spring.cloud.openfeign.client.config.default.readTimeout: 1000

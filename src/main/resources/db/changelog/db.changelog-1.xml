@@ -114,4 +114,10 @@
         </createIndex>
     </changeSet>
 
+    <changeSet id="6-add-orders-created-at-index" author="maxonkizino">
+        <createIndex tableName="orders" indexName="idx_orders_created_at">
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>

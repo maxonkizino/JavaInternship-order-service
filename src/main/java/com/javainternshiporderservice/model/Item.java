@@ -21,7 +21,7 @@ public class Item extends BaseAuditingEntity{
     @Column(name = "price")
     private BigDecimal price;
 
-    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
     private List<OrderItem> orderItems;
 
     @Column(name = "active")

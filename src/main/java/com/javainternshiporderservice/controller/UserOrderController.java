@@ -3,6 +3,8 @@ package com.javainternshiporderservice.controller;
 import com.javainternshiporderservice.dto.response.OrderWithUserResponse;
 import com.javainternshiporderservice.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +21,9 @@ public class UserOrderController {
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<OrderWithUserResponse> getOrderForUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(orderService.getOrderByUserId(userId));
+    public ResponseEntity<Page<OrderWithUserResponse>> getOrdersForUser(
+            @PathVariable Long userId,
+            Pageable pageable) {
+        return ResponseEntity.ok(orderService.getOrdersByUserId(userId, pageable));
     }
 }

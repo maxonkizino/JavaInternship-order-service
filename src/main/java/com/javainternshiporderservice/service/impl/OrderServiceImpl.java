@@ -52,9 +52,23 @@ public class OrderServiceImpl implements OrderService {
     private final UserServiceClient userServiceClient;
     private final SecurityUtils securityUtils;
 
+    private UserInfoResponse loadUserInfoForOrder(Order order) {
+        Long ownerId = order.getUserId();
+        String jwtEmail = securityUtils.getCurrentUserEmail();
+        Long currentUserId = securityUtils.getCurrentUserId();
+        boolean sameUser = currentUserId != null && ownerId.equals(currentUserId);
+        if (sameUser && jwtEmail != null && !jwtEmail.isBlank()) {
+            UserInfoResponse userInfo = userServiceClient.fetchUserByEmail(jwtEmail);
+            if (!userInfo.getId().equals(ownerId)) {
+                throw new AccessDeniedException("Token email does not match order owner");
+            }
+            return userInfo;
+        }
+        return userServiceClient.fetchUserById(ownerId);
+    }
+
     private OrderWithUserResponse assembleWithUser(Order order) {
-        UserInfoResponse userInfo = userServiceClient.fetchUserById(order.getUserId());
-        return orderWithUserAssembler.assemble(order, userInfo);
+        return orderWithUserAssembler.assemble(order, loadUserInfoForOrder(order));
     }
 
     @Override
@@ -77,7 +91,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public OrderWithUserResponse getOrderByUserId(Long userId) {
+    public Page<OrderWithUserResponse> getOrdersByUserId(Long userId, Pageable pageable) {
         if (!securityUtils.isOwnerOrAdmin(userId)) {
             throw new AccessDeniedException(ACCESS_DENIED_TO_ORDERS_FOR_USER + userId);
         }
@@ -86,11 +100,13 @@ public class OrderServiceImpl implements OrderService {
                 .where(OrderSpecification.hasUserId(userId))
                 .and(OrderSpecification.isActive());
 
-        Order order = orderRepository
-                .findOne(spec)
-                .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + " with userId: " + userId));
+        Page<Order> orders = orderRepository.findAll(spec, pageable);
 
-        return assembleWithUser(order);
+        List<OrderWithUserResponse> content = orders.getContent().stream()
+                .map(this::assembleWithUser)
+                .toList();
+
+        return new PageImpl<>(content, orders.getPageable(), orders.getTotalElements());
     }
 
     @Override
@@ -217,7 +233,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public void activateOrder(UUID id) {
+    public OrderWithUserResponse activateOrder(UUID id) {
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + WITH_ID + id));
 
@@ -227,6 +243,10 @@ public class OrderServiceImpl implements OrderService {
 
         orderRepository.activateOrder(id);
         orderItemRepository.activateByOrderId(id);
+
+        Order reactivated = orderRepository.findById(id)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + WITH_ID + id));
+        return assembleWithUser(reactivated);
     }
 
     @Override
@@ -244,24 +264,6 @@ public class OrderServiceImpl implements OrderService {
 
         orderRepository.deactivateOrder(id);
         orderItemRepository.deactivateByOrderId(id);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public OrderWithUserResponse getOrderWithUserById(UUID orderId, String userEmail) {
-        Specification<Order> spec = Specification
-                .where(OrderSpecification.hasId(orderId))
-                .and(OrderSpecification.isActive());
-        Order order = orderRepository
-                .findOne(spec)
-                .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + WITH_ID + orderId));
-
-        if (!securityUtils.isOwnerOrAdmin(order.getUserId())) {
-            throw new AccessDeniedException(ACCESS_DENIED_TO_ORDER + orderId);
-        }
-
-        UserInfoResponse userInfo = userServiceClient.fetchUserByEmail(userEmail);
-        return orderWithUserAssembler.assemble(order, userInfo);
     }
 
 }

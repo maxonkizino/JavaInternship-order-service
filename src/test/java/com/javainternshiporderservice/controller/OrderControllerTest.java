@@ -67,7 +67,7 @@ class OrderControllerTest {
     void getOrderById_shouldReturnOrder() {
         when(orderService.getOrderById(orderId)).thenReturn(orderResponse);
 
-        ResponseEntity<OrderWithUserResponse> response = orderController.getOrderById(orderId, null);
+        ResponseEntity<OrderWithUserResponse> response = orderController.getOrderById(orderId);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(orderResponse);
@@ -166,11 +166,12 @@ class OrderControllerTest {
 
     @Test
     void activateOrder_shouldActivateOrder() {
-        doNothing().when(orderService).activateOrder(orderId);
+        when(orderService.activateOrder(orderId)).thenReturn(orderResponse);
 
-        ResponseEntity<Void> response = orderController.activateOrder(orderId);
+        ResponseEntity<OrderWithUserResponse> response = orderController.activateOrder(orderId);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(orderResponse);
         verify(orderService).activateOrder(orderId);
     }
 
@@ -182,18 +183,6 @@ class OrderControllerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         verify(orderService).deactivateOrder(orderId);
-    }
-
-    @Test
-    void getOrderById_shouldReturnOrderWithUser_whenUserEmailProvided() {
-        when(orderService.getOrderWithUserById(orderId, "user@example.com")).thenReturn(orderResponse);
-
-        ResponseEntity<OrderWithUserResponse> response =
-                orderController.getOrderById(orderId, "user@example.com");
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isEqualTo(orderResponse);
-        verify(orderService).getOrderWithUserById(orderId, "user@example.com");
     }
 
     @Test

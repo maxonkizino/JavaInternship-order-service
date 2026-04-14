@@ -8,10 +8,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,25 +43,31 @@ class UserOrderControllerTest {
     }
 
     @Test
-    void getOrderForUser_shouldReturnOrder() {
-        when(orderService.getOrderByUserId(userId)).thenReturn(orderResponse);
+    void getOrdersForUser_shouldReturnPage() {
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<OrderWithUserResponse> page = new PageImpl<>(List.of(orderResponse), pageable, 1);
+        when(orderService.getOrdersByUserId(userId, pageable)).thenReturn(page);
 
-        ResponseEntity<OrderWithUserResponse> response = userOrderController.getOrderForUser(userId);
+        ResponseEntity<Page<OrderWithUserResponse>> response =
+                userOrderController.getOrdersForUser(userId, pageable);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isEqualTo(orderResponse);
-        verify(orderService).getOrderByUserId(userId);
+        assertThat(response.getBody()).isEqualTo(page);
+        verify(orderService).getOrdersByUserId(userId, pageable);
     }
 
     @Test
-    void getOrderForUser_shouldUsePathUserId() {
+    void getOrdersForUser_shouldUsePathUserId() {
         Long otherUserId = 42L;
-        when(orderService.getOrderByUserId(otherUserId)).thenReturn(orderResponse);
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<OrderWithUserResponse> page = new PageImpl<>(List.of(orderResponse), pageable, 1);
+        when(orderService.getOrdersByUserId(otherUserId, pageable)).thenReturn(page);
 
-        ResponseEntity<OrderWithUserResponse> response = userOrderController.getOrderForUser(otherUserId);
+        ResponseEntity<Page<OrderWithUserResponse>> response =
+                userOrderController.getOrdersForUser(otherUserId, pageable);
 
-        assertThat(response.getBody()).isEqualTo(orderResponse);
-        verify(orderService).getOrderByUserId(otherUserId);
-        verify(orderService, never()).getOrderByUserId(userId);
+        assertThat(response.getBody()).isEqualTo(page);
+        verify(orderService).getOrdersByUserId(otherUserId, pageable);
+        verify(orderService, never()).getOrdersByUserId(eq(userId), any(Pageable.class));
     }
 }

@@ -44,6 +44,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Sql(scripts = {"/clean-orders.sql", "/item-seed.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class OrderControllerIntegrationTest {
 
+    private static final String USER_JOHN_BY_EMAIL_URL = "/api/users/by-email/john%40example.com";
+
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
@@ -78,7 +80,7 @@ class OrderControllerIntegrationTest {
         userInfo.setBirthDate(LocalDate.of(1990, 1, 1));
         userInfo.setActive(true);
 
-        stubFor(WireMock.get(urlEqualTo("/api/users/1"))
+        stubFor(WireMock.get(urlEqualTo(USER_JOHN_BY_EMAIL_URL))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
@@ -106,7 +108,7 @@ class OrderControllerIntegrationTest {
                 .andExpect(jsonPath("$.order.status").value("PENDING"))
                 .andExpect(jsonPath("$.user.name").value("John"));
 
-        verify(getRequestedFor(urlEqualTo("/api/users/1")));
+        verify(getRequestedFor(urlEqualTo(USER_JOHN_BY_EMAIL_URL)));
     }
 
     @Test
@@ -120,7 +122,7 @@ class OrderControllerIntegrationTest {
         userInfo.setBirthDate(LocalDate.of(1990, 1, 1));
         userInfo.setActive(true);
 
-        stubFor(WireMock.get(urlEqualTo("/api/users/1"))
+        stubFor(WireMock.get(urlEqualTo(USER_JOHN_BY_EMAIL_URL))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
@@ -180,7 +182,7 @@ class OrderControllerIntegrationTest {
         userInfo.setBirthDate(LocalDate.of(1990, 1, 1));
         userInfo.setActive(true);
 
-        stubFor(WireMock.get(urlEqualTo("/api/users/1"))
+        stubFor(WireMock.get(urlEqualTo(USER_JOHN_BY_EMAIL_URL))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
@@ -259,7 +261,7 @@ class OrderControllerIntegrationTest {
         userInfo.setBirthDate(LocalDate.of(1990, 1, 1));
         userInfo.setActive(true);
 
-        stubFor(WireMock.get(urlEqualTo("/api/users/1"))
+        stubFor(WireMock.get(urlEqualTo(USER_JOHN_BY_EMAIL_URL))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
@@ -297,7 +299,7 @@ class OrderControllerIntegrationTest {
     @Test
     void userServiceCircuitBreaker_shouldReturnFallback_whenUserServiceIsDown() throws Exception {
         // given - User Service returns error (simulating Circuit Breaker)
-        stubFor(WireMock.get(urlEqualTo("/api/users/1"))
+        stubFor(WireMock.get(urlEqualTo(USER_JOHN_BY_EMAIL_URL))
                 .willReturn(aResponse()
                         .withStatus(500)
                         .withBody("Service Unavailable")));
@@ -437,7 +439,9 @@ class OrderControllerIntegrationTest {
         mockMvc.perform(put("/api/orders/{id}/activate", orderId)
                         .with(asAdmin())
                         .with(csrf()))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.order.id").value(orderId))
+                .andExpect(jsonPath("$.user.name").value("John"));
     }
 
     @Test
@@ -490,7 +494,7 @@ class OrderControllerIntegrationTest {
 
     private static RequestPostProcessor asUser(long userId) {
         return jwt()
-                .jwt(j -> j.subject(String.valueOf(userId)))
+                .jwt(j -> j.subject(String.valueOf(userId)).claim("email", "john@example.com"))
                 .authorities(new SimpleGrantedAuthority("ROLE_USER"));
     }
 

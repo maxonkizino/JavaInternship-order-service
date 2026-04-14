@@ -5,7 +5,6 @@ import com.javainternshiporderservice.dto.request.update.UpdateOrderRequest;
 import com.javainternshiporderservice.dto.response.OrderWithUserResponse;
 import com.javainternshiporderservice.service.OrderService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -71,12 +70,7 @@ public class OrderController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<OrderWithUserResponse> getOrderById(
-            @PathVariable UUID id,
-            @RequestParam(required = false) @Email String userEmail) {
-        if (userEmail != null && !userEmail.isBlank()) {
-            return ResponseEntity.ok(orderService.getOrderWithUserById(id, userEmail));
-        }
+    public ResponseEntity<OrderWithUserResponse> getOrderById(@PathVariable UUID id) {
         return ResponseEntity.ok(orderService.getOrderById(id));
     }
 
@@ -99,9 +93,8 @@ public class OrderController {
 
     @PutMapping("/{id}/activate")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<Void> activateOrder(@PathVariable UUID id) {
-        orderService.activateOrder(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<OrderWithUserResponse> activateOrder(@PathVariable UUID id) {
+        return ResponseEntity.ok(orderService.activateOrder(id));
     }
 
     @DeleteMapping("/{id}")

@@ -16,7 +16,7 @@ public interface OrderService {
 
     OrderWithUserResponse getOrderById(UUID id);
 
-    OrderWithUserResponse getOrderByUserId(Long userId);
+    Page<OrderWithUserResponse> getOrdersByUserId(Long userId, Pageable pageable);
 
     Page<OrderWithUserResponse> getAllOrders(Pageable pageable);
 
@@ -33,9 +33,7 @@ public interface OrderService {
 
     OrderWithUserResponse updateOrder(UUID id, UpdateOrderRequest updateOrderRequest);
 
-    void activateOrder(UUID id);
+    OrderWithUserResponse activateOrder(UUID id);
 
     void deactivateOrder(UUID id);
-
-    OrderWithUserResponse getOrderWithUserById(UUID orderId, String userEmail);
 }
