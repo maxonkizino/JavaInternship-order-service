@@ -30,6 +30,17 @@ spring:
             connect-timeout: 5000
             read-timeout: 5000
             logger-level: basic
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ${APP_KAFKA_GROUP_ID:order-service}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.javainternshiporderservice.event
+        spring.json.value.default.type: com.javainternshiporderservice.event.CreatePaymentEvent
+    listener:
+      missing-topics-fatal: false
 
 
 USER_SERVICE_URL: ${USER_SERVICE_BASE_URL:http://localhost:8081}
@@ -89,3 +100,7 @@ management:
 app:
   name: ${spring.application.name}
   version: @project.version@
+  kafka:
+    enabled: ${APP_KAFKA_ENABLED:true}
+    topics:
+      create-payment: ${APP_KAFKA_TOPIC_CREATE_PAYMENT:create-payment}
