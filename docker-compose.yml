@@ -64,10 +64,10 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-
 volumes:
   postgres_data:
 
 networks:
   order-service-network:
     driver: bridge
+

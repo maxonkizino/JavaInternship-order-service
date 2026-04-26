@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: order-service
   datasource:
     url: ${DB_URL:jdbc:tc:postgresql:16-alpine:///order_service_test?user=postgres&password=postgres}
     username: ${DB_USERNAME:postgres}
@@ -16,9 +18,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
+          secret-key: ${JWT_TEST_SECRET}
           enabled: false
-
-USER_SERVICE_URL: ${USER_SERVICE_BASE_URL:http://localhost:8080}
 
 spring.cloud.openfeign.client.config.default.connectTimeout: 1000
 spring.cloud.openfeign.client.config.default.readTimeout: 1000
@@ -62,6 +63,8 @@ management:
     health:
       show-details: never
 
-# HS256 test key for JwtDecoder in profile "test". Override with env JWT_TEST_SECRET when set (non-empty).
-jwt:
-  test-secret: ${JWT_TEST_SECRET:test-secret-key-at-least-256-bits-long-for-hs256-xxxxxxxx}
+JWT_TEST_SECRET: test-secret-key-at-least-256-bits-long-for-hs256-xxxxxxxx
+USER_SERVICE_URL: http://localhost:8080
+
+app:
+  name: order-service

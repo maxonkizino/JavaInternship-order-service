@@ -5,9 +5,9 @@ spring:
 
   datasource:
     url: ${DB_URL}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
-    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: ${DB_DRIVER}
 
   jpa:
     hibernate:
@@ -17,13 +17,7 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
 
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          secret-key: ${JWT_SECRET}
-
-USER_SERVICE_URL: ${USER_SERVICE_URL:http://user-service:8081}
+USER_SERVICE_URL: ${USER_SERVICE_URL}
 
 server:
-  port: ${SERVER_PORT:8083}
+  port: ${SERVER_PORT}

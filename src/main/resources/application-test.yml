@@ -4,6 +4,12 @@ spring:
     bootstrap-servers: localhost:9092
     listener:
       auto-startup: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key: ${JWT_TEST_SECRET}
+          enabled: false
   datasource:
     url: ${DB_URL:jdbc:tc:postgresql:16-alpine:///order_service_test}
     username: ${DB_USERNAME:test}
@@ -17,15 +23,9 @@ spring:
     change-log: classpath:db/changelog/db.changelog-master.xml
     contexts: test
     drop-first: true
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-
-          enabled: false
 
 
-USER_SERVICE_URL: ${USER_SERVICE_BASE_URL:http://localhost:8080}
+USER_SERVICE_URL: ${USER_SERVICE_URL}
 
 
 spring.cloud.openfeign.client.config.default.connectTimeout: 1000
@@ -62,7 +62,7 @@ logging:
 
 
 server:
-  port: 0  
+  port: 0
 
 
 management:
@@ -73,9 +73,6 @@ management:
   endpoint:
     health:
       show-details: never
-
-jwt:
-  test-secret: ${JWT_TEST_SECRET:test-secret-key-at-least-256-bits-long-for-hs256-xxxxxxxx}
 
 app:
   kafka:

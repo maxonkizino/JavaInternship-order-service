@@ -3,6 +3,7 @@ package com.javainternshiporderservice.controller;
 import com.javainternshiporderservice.dto.request.create.CreateOrderItemRequest;
 import com.javainternshiporderservice.dto.request.update.UpdateOrderItemRequest;
 import com.javainternshiporderservice.dto.response.OrderItemResponse;
+import com.javainternshiporderservice.logging.ControllerLogger;
 import com.javainternshiporderservice.service.OrderItemService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ import java.util.UUID;
 public class OrderItemController {
 
     private final OrderItemService orderItemService;
+    private final ControllerLogger controllerLogger;
 
     @GetMapping("/filtered")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
@@ -40,6 +42,7 @@ public class OrderItemController {
             @RequestParam(required = false) UUID orderId,
             @RequestParam(required = false) UUID itemId,
             Pageable pageable) {
+        controllerLogger.methodCalled("OrderItemController", "getOrderItemsWithFilter", active, orderId, itemId);
         Page<OrderItemResponse> orderItems = orderItemService.getOrderItemsWithFilter(active, orderId, itemId, pageable);
         return ResponseEntity.ok(orderItems);
     }
@@ -47,6 +50,7 @@ public class OrderItemController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<OrderItemResponse> getOrderItemById(@PathVariable UUID id) {
+        controllerLogger.methodCalled("OrderItemController", "getOrderItemById", id);
         OrderItemResponse orderItem = orderItemService.getOrderItemById(id);
         return ResponseEntity.ok(orderItem);
     }
@@ -54,6 +58,7 @@ public class OrderItemController {
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<Page<OrderItemResponse>> getAllOrderItems(Pageable pageable) {
+        controllerLogger.methodCalled("OrderItemController", "getAllOrderItems");
         Page<OrderItemResponse> orderItems = orderItemService.getAllOrderItems(pageable);
         return ResponseEntity.ok(orderItems);
     }
@@ -62,6 +67,7 @@ public class OrderItemController {
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<OrderItemResponse> createOrderItem(
             @Valid @RequestBody CreateOrderItemRequest createOrderItemRequest) {
+        controllerLogger.methodCalled("OrderItemController", "createOrderItem", createOrderItemRequest.getItemId(), createOrderItemRequest.getQuantity());
         OrderItemResponse createdOrderItem = orderItemService.createOrderItem(createOrderItemRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrderItem);
     }
@@ -70,6 +76,7 @@ public class OrderItemController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<OrderItemResponse> updateOrderItem(
             @Valid @RequestBody UpdateOrderItemRequest updateOrderItemRequest) {
+        controllerLogger.methodCalled("OrderItemController", "updateOrderItem", updateOrderItemRequest.getId());
         OrderItemResponse updatedOrderItem = orderItemService.updateOrderItem(updateOrderItemRequest);
         return ResponseEntity.ok(updatedOrderItem);
     }
@@ -77,6 +84,7 @@ public class OrderItemController {
     @PutMapping("/{id}/activate")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> activateOrderItem(@PathVariable UUID id) {
+        controllerLogger.methodCalled("OrderItemController", "activateOrderItem", id);
         orderItemService.activateOrderItem(id);
         return ResponseEntity.noContent().build();
     }
@@ -84,6 +92,7 @@ public class OrderItemController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> deactivateOrderItem(@PathVariable UUID id) {
+        controllerLogger.methodCalled("OrderItemController", "deactivateOrderItem", id);
         orderItemService.deactivateOrderItem(id);
         return ResponseEntity.noContent().build();
     }
