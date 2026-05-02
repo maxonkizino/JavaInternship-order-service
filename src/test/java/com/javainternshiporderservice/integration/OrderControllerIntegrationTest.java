@@ -94,7 +94,7 @@ class OrderControllerIntegrationTest {
                 "status": "PENDING",
                 "totalPrice": 150.00,
                 "orderItems": [
-                    { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
+                    { "orderId": "00000000-0000-0000-0000-000000000001", "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
                 ],
                 "deleted": false
             }
@@ -136,7 +136,7 @@ class OrderControllerIntegrationTest {
                 "status": "PENDING",
                 "totalPrice": 150.00,
                 "orderItems": [
-                    { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
+                    { "orderId": "00000000-0000-0000-0000-000000000001", "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
                 ],
                 "deleted": false
             }
@@ -196,7 +196,7 @@ class OrderControllerIntegrationTest {
                 "status": "PENDING",
                 "totalPrice": 150.00,
                 "orderItems": [
-                    { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
+                    { "orderId": "00000000-0000-0000-0000-000000000001", "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
                 ],
                 "deleted": false
             }
@@ -275,7 +275,7 @@ class OrderControllerIntegrationTest {
                 "status": "PENDING",
                 "totalPrice": 150.00,
                 "orderItems": [
-                    { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
+                    { "orderId": "00000000-0000-0000-0000-000000000001", "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
                 ],
                 "deleted": false
             }
@@ -312,7 +312,7 @@ class OrderControllerIntegrationTest {
                 "status": "PENDING",
                 "totalPrice": 150.00,
                 "orderItems": [
-                    { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
+                    { "orderId": "00000000-0000-0000-0000-000000000001", "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
                 ],
                 "deleted": false
             }
@@ -352,7 +352,7 @@ class OrderControllerIntegrationTest {
                 "status": "PENDING",
                 "totalPrice": 150.00,
                 "orderItems": [
-                    { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
+                    { "orderId": "00000000-0000-0000-0000-000000000001", "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
                 ],
                 "deleted": false
             }
@@ -413,7 +413,7 @@ class OrderControllerIntegrationTest {
                 "status": "PENDING",
                 "totalPrice": 150.00,
                 "orderItems": [
-                    { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
+                    { "orderId": "00000000-0000-0000-0000-000000000001", "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
                 ],
                 "deleted": false
             }
@@ -469,7 +469,7 @@ class OrderControllerIntegrationTest {
                 "status": "PENDING",
                 "totalPrice": 150.00,
                 "orderItems": [
-                    { "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
+                    { "orderId": "00000000-0000-0000-0000-000000000001", "itemId": "11111111-1111-1111-1111-111111111111", "quantity": 1, "active": true }
                 ],
                 "deleted": false
             }

@@ -5,8 +5,12 @@ import com.javainternshiporderservice.dto.request.update.UpdateOrderItemRequest;
 import com.javainternshiporderservice.dto.response.OrderItemResponse;
 import com.javainternshiporderservice.exception.OrderItemNotFoundException;
 import com.javainternshiporderservice.mapper.OrderItemMapper;
+import com.javainternshiporderservice.model.Item;
+import com.javainternshiporderservice.model.Order;
 import com.javainternshiporderservice.model.OrderItem;
+import com.javainternshiporderservice.repository.ItemRepository;
 import com.javainternshiporderservice.repository.OrderItemRepository;
+import com.javainternshiporderservice.repository.OrderRepository;
 import com.javainternshiporderservice.service.impl.OrderItemServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +41,12 @@ class OrderItemServiceImplTest {
 
     @Mock
     private OrderItemRepository orderItemRepository;
+
+    @Mock
+    private OrderRepository orderRepository;
+
+    @Mock
+    private ItemRepository itemRepository;
 
     @InjectMocks
     private OrderItemServiceImpl orderItemService;
@@ -135,10 +145,22 @@ class OrderItemServiceImplTest {
     void createOrderItem_shouldCreateAndReturnOrderItem() {
         // given
         CreateOrderItemRequest request = new CreateOrderItemRequest();
+        request.setOrderId(orderId);
+        request.setItemId(itemId);
         request.setQuantity(10);
 
+        Order order = new Order();
+        order.setId(orderId);
+        order.setTotalPrice(java.math.BigDecimal.ZERO);
+        Item item = new Item();
+        item.setId(itemId);
+        item.setPrice(new java.math.BigDecimal("10.00"));
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(orderItemMapper.toOrderItem(request)).thenReturn(orderItem);
-        when(orderItemRepository.save(orderItem)).thenReturn(orderItem);
+        when(orderItemRepository.saveAndFlush(orderItem)).thenReturn(orderItem);
+        when(orderRepository.saveAndFlush(order)).thenReturn(order);
         when(orderItemMapper.toOrderItemResponse(orderItem)).thenReturn(orderItemResponse);
 
         // when
@@ -146,7 +168,7 @@ class OrderItemServiceImplTest {
 
         // then
         assertThat(result).isEqualTo(orderItemResponse);
-        verify(orderItemRepository).save(orderItem);
+        verify(orderItemRepository).saveAndFlush(orderItem);
     }
 
     @Test

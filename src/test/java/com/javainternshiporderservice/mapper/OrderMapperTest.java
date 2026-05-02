@@ -7,27 +7,55 @@ import com.javainternshiporderservice.dto.request.update.UpdateOrderRequest;
 import com.javainternshiporderservice.dto.response.OrderResponse;
 import com.javainternshiporderservice.model.Order;
 import com.javainternshiporderservice.model.OrderItem;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class OrderMapperTest {
 
     private OrderMapperImpl orderMapper;
 
+    @Mock
+    private OrderItemMapper orderItemMapper;
+
     @BeforeEach
     void setUp() {
         orderMapper = new OrderMapperImpl();
+        try {
+            Field field = OrderMapperImpl.class.getDeclaredField("orderItemMapper");
+            field.setAccessible(true);
+            field.set(orderMapper, orderItemMapper);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Failed to inject OrderItemMapper into OrderMapperImpl", e);
+        }
+
+        when(orderItemMapper.toOrderItemResponses(any())).thenReturn(Collections.emptyList());
+        when(orderItemMapper.toOrderItem(any(CreateOrderItemRequest.class))).thenAnswer(invocation -> {
+            CreateOrderItemRequest request = invocation.getArgument(0);
+            OrderItem orderItem = new OrderItem();
+            orderItem.setQuantity(request.getQuantity() == null ? 0 : request.getQuantity());
+            return orderItem;
+        });
     }
 
     @Test

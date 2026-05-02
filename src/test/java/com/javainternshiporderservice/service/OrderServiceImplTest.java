@@ -244,7 +244,7 @@ class OrderServiceImplTest {
 
         when(securityUtils.isCurrentUserAdmin()).thenReturn(true);
         when(orderMapper.toOrder(request)).thenReturn(order);
-        when(orderRepository.save(order)).thenReturn(order);
+        when(orderRepository.saveAndFlush(order)).thenReturn(order);
         when(userServiceClient.fetchUserById(userId)).thenReturn(userInfoResponse);
         when(orderWithUserAssembler.assemble(order, userInfoResponse)).thenReturn(orderWithUserResponse);
 
@@ -252,7 +252,7 @@ class OrderServiceImplTest {
 
         // then
         assertThat(result).isEqualTo(orderWithUserResponse);
-        verify(orderRepository).save(order);
+        verify(orderRepository).saveAndFlush(order);
     }
 
     @Test
@@ -267,7 +267,7 @@ class OrderServiceImplTest {
         when(securityUtils.getCurrentUserId()).thenReturn(userId);
         when(securityUtils.getCurrentUserEmail()).thenReturn("john@example.com");
         when(orderMapper.toOrder(request)).thenReturn(order);
-        when(orderRepository.save(order)).thenReturn(order);
+        when(orderRepository.saveAndFlush(order)).thenReturn(order);
         when(userServiceClient.fetchUserByEmail("john@example.com")).thenReturn(userInfoResponse);
         when(orderWithUserAssembler.assemble(order, userInfoResponse)).thenReturn(orderWithUserResponse);
 

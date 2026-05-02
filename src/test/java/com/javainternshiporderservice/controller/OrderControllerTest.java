@@ -3,6 +3,7 @@ package com.javainternshiporderservice.controller;
 import com.javainternshiporderservice.dto.request.create.CreateOrderRequest;
 import com.javainternshiporderservice.dto.request.update.UpdateOrderRequest;
 import com.javainternshiporderservice.dto.response.OrderWithUserResponse;
+import com.javainternshiporderservice.logging.ControllerLogger;
 import com.javainternshiporderservice.service.OrderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,9 @@ class OrderControllerTest {
 
     @Mock
     private OrderService orderService;
+
+    @Mock
+    private ControllerLogger controllerLogger;
 
     @InjectMocks
     private OrderController orderController;
