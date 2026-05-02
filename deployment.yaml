@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: java-internship-order-service
+  labels:
+    app: java-internship-order-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: java-internship-order-service
+  template:
+    metadata:
+      labels:
+        app: java-internship-order-service
+    spec:
+      containers:
+        - name: java-internship-order-service
+          image: maxononion/javainternship-order-service:latest
+          ports:
+            - containerPort: 8083
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: docker
+            - name: SERVER_PORT
+              value: "8083"
+            - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: java-internship-order-service-secret
+                  key: JWT_SECRET
+          envFrom:
+            - secretRef:
+                name: java-internship-order-service-secret

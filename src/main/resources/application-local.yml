@@ -1,0 +1,63 @@
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/order_service_local}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  liquibase:
+    contexts: local
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+
+          enabled: false
+
+
+USER_SERVICE_URL: ${USER_SERVICE_URL:http://localhost:8081}
+
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        enabled: false
+  timelimiter:
+    configs:
+      default:
+        enabled: false
+
+
+logging:
+  level:
+    com.javainternshiporderservice: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type: TRACE
+  pattern:
+    console: "%highlight(%d{HH:mm:ss}) [%cyan(%thread)] %yellow(%-5level) %green(%logger{36}) - %msg%n"
+
+
+server:
+  port: ${SERVER_PORT:8083}
+  error:
+    include-message: always
+    include-stacktrace: on-param
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
