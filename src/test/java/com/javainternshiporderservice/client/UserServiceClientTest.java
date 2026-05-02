@@ -16,7 +16,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -75,7 +74,7 @@ class UserServiceClientTest {
         UserInfoResponse fallbackUser = new UserInfoResponse();
         fallbackUser.setName("Unknown");
         when(userClient.getUserById(userId)).thenThrow(new RuntimeException("service down"));
-        when(fallback.createFallback(eq("userId=" + userId))).thenReturn(fallbackUser);
+        when(fallback.createFallback("userId=" + userId)).thenReturn(fallbackUser);
 
         UserInfoResponse result = userServiceClient.fetchUserById(userId);
 
@@ -101,7 +100,7 @@ class UserServiceClientTest {
         String email = "x@y.com";
         UserInfoResponse fallbackUser = new UserInfoResponse();
         when(userClient.getUserByEmail(email)).thenThrow(new RuntimeException("timeout"));
-        when(fallback.createFallback(eq("email=" + email))).thenReturn(fallbackUser);
+        when(fallback.createFallback("email=" + email)).thenReturn(fallbackUser);
 
         UserInfoResponse result = userServiceClient.fetchUserByEmail(email);
 

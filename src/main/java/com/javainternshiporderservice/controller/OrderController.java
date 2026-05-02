@@ -33,6 +33,8 @@ import java.util.UUID;
 @Validated
 public class OrderController {
 
+    private static final String CONTROLLER = "OrderController";
+
     private final OrderService orderService;
     private final ControllerLogger controllerLogger;
 
@@ -46,7 +48,7 @@ public class OrderController {
             @RequestParam(required = false) Instant createdAtTo,
             @RequestParam(required = false) Long userId,
             Pageable pageable) {
-        controllerLogger.methodCalled("OrderController", "getOrders", active, status, statuses, createdAtFrom, createdAtTo, userId);
+        controllerLogger.methodCalled(CONTROLLER, "getOrders", active, status, statuses, createdAtFrom, createdAtTo, userId);
         if (hasFilterParams(active, status, statuses, createdAtFrom, createdAtTo, userId)) {
             Page<OrderWithUserResponse> orders = orderService.getOrdersWithFilter(
                     active, status, statuses, createdAtFrom, createdAtTo, userId, pageable);
@@ -74,7 +76,7 @@ public class OrderController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<OrderWithUserResponse> getOrderById(@PathVariable UUID id) {
-        controllerLogger.methodCalled("OrderController", "getOrderById", id);
+        controllerLogger.methodCalled(CONTROLLER, "getOrderById", id);
         return ResponseEntity.ok(orderService.getOrderById(id));
     }
 
@@ -82,7 +84,7 @@ public class OrderController {
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<OrderWithUserResponse> createOrder(
             @Valid @RequestBody CreateOrderRequest createOrderRequest) {
-        controllerLogger.methodCalled("OrderController", "createOrder", createOrderRequest.getUserId());
+        controllerLogger.methodCalled(CONTROLLER, "createOrder", createOrderRequest.getUserId());
         OrderWithUserResponse createdOrder = orderService.createOrder(createOrderRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
     }
@@ -92,7 +94,7 @@ public class OrderController {
     public ResponseEntity<OrderWithUserResponse> updateOrder(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateOrderRequest updateOrderRequest) {
-        controllerLogger.methodCalled("OrderController", "updateOrder", id);
+        controllerLogger.methodCalled(CONTROLLER, "updateOrder", id);
         OrderWithUserResponse updatedOrder = orderService.updateOrder(id, updateOrderRequest);
         return ResponseEntity.ok(updatedOrder);
     }
@@ -100,14 +102,14 @@ public class OrderController {
     @PutMapping("/{id}/activate")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<OrderWithUserResponse> activateOrder(@PathVariable UUID id) {
-        controllerLogger.methodCalled("OrderController", "activateOrder", id);
+        controllerLogger.methodCalled(CONTROLLER, "activateOrder", id);
         return ResponseEntity.ok(orderService.activateOrder(id));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> deactivateOrder(@PathVariable UUID id) {
-        controllerLogger.methodCalled("OrderController", "deactivateOrder", id);
+        controllerLogger.methodCalled(CONTROLLER, "deactivateOrder", id);
         orderService.deactivateOrder(id);
         return ResponseEntity.noContent().build();
     }

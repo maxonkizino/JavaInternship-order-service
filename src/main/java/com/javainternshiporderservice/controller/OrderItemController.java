@@ -32,6 +32,8 @@ import java.util.UUID;
 @Validated
 public class OrderItemController {
 
+    private static final String CONTROLLER = "OrderItemController";
+
     private final OrderItemService orderItemService;
     private final ControllerLogger controllerLogger;
 
@@ -42,7 +44,7 @@ public class OrderItemController {
             @RequestParam(required = false) UUID orderId,
             @RequestParam(required = false) UUID itemId,
             Pageable pageable) {
-        controllerLogger.methodCalled("OrderItemController", "getOrderItemsWithFilter", active, orderId, itemId);
+        controllerLogger.methodCalled(CONTROLLER, "getOrderItemsWithFilter", active, orderId, itemId);
         Page<OrderItemResponse> orderItems = orderItemService.getOrderItemsWithFilter(active, orderId, itemId, pageable);
         return ResponseEntity.ok(orderItems);
     }
@@ -50,7 +52,7 @@ public class OrderItemController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<OrderItemResponse> getOrderItemById(@PathVariable UUID id) {
-        controllerLogger.methodCalled("OrderItemController", "getOrderItemById", id);
+        controllerLogger.methodCalled(CONTROLLER, "getOrderItemById", id);
         OrderItemResponse orderItem = orderItemService.getOrderItemById(id);
         return ResponseEntity.ok(orderItem);
     }
@@ -58,7 +60,7 @@ public class OrderItemController {
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<Page<OrderItemResponse>> getAllOrderItems(Pageable pageable) {
-        controllerLogger.methodCalled("OrderItemController", "getAllOrderItems");
+        controllerLogger.methodCalled(CONTROLLER, "getAllOrderItems");
         Page<OrderItemResponse> orderItems = orderItemService.getAllOrderItems(pageable);
         return ResponseEntity.ok(orderItems);
     }
@@ -67,7 +69,7 @@ public class OrderItemController {
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<OrderItemResponse> createOrderItem(
             @Valid @RequestBody CreateOrderItemRequest createOrderItemRequest) {
-        controllerLogger.methodCalled("OrderItemController", "createOrderItem", createOrderItemRequest.getItemId(), createOrderItemRequest.getQuantity());
+        controllerLogger.methodCalled(CONTROLLER, "createOrderItem", createOrderItemRequest.getItemId(), createOrderItemRequest.getQuantity());
         OrderItemResponse createdOrderItem = orderItemService.createOrderItem(createOrderItemRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrderItem);
     }
@@ -76,7 +78,7 @@ public class OrderItemController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<OrderItemResponse> updateOrderItem(
             @Valid @RequestBody UpdateOrderItemRequest updateOrderItemRequest) {
-        controllerLogger.methodCalled("OrderItemController", "updateOrderItem", updateOrderItemRequest.getId());
+        controllerLogger.methodCalled(CONTROLLER, "updateOrderItem", updateOrderItemRequest.getId());
         OrderItemResponse updatedOrderItem = orderItemService.updateOrderItem(updateOrderItemRequest);
         return ResponseEntity.ok(updatedOrderItem);
     }
@@ -84,7 +86,7 @@ public class OrderItemController {
     @PutMapping("/{id}/activate")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> activateOrderItem(@PathVariable UUID id) {
-        controllerLogger.methodCalled("OrderItemController", "activateOrderItem", id);
+        controllerLogger.methodCalled(CONTROLLER, "activateOrderItem", id);
         orderItemService.activateOrderItem(id);
         return ResponseEntity.noContent().build();
     }
@@ -92,7 +94,7 @@ public class OrderItemController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> deactivateOrderItem(@PathVariable UUID id) {
-        controllerLogger.methodCalled("OrderItemController", "deactivateOrderItem", id);
+        controllerLogger.methodCalled(CONTROLLER, "deactivateOrderItem", id);
         orderItemService.deactivateOrderItem(id);
         return ResponseEntity.noContent().build();
     }

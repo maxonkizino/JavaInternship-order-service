@@ -34,6 +34,8 @@ import java.util.UUID;
 @Validated
 public class ItemController {
 
+    private static final String CONTROLLER = "ItemController";
+
     private final ItemService itemService;
     private final ControllerLogger controllerLogger;
 
@@ -44,7 +46,7 @@ public class ItemController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) BigDecimal price,
             Pageable pageable) {
-        controllerLogger.methodCalled("ItemController", "getItemsWithFilter", active, name, price);
+        controllerLogger.methodCalled(CONTROLLER, "getItemsWithFilter", active, name, price);
         Page<ItemResponse> items = itemService.getItemsWithFilter(active, name, price, pageable);
         return ResponseEntity.ok(items);
     }
@@ -52,7 +54,7 @@ public class ItemController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<ItemResponse> getItemById(@PathVariable UUID id) {
-        controllerLogger.methodCalled("ItemController", "getItemById", id);
+        controllerLogger.methodCalled(CONTROLLER, "getItemById", id);
         ItemResponse item = itemService.getItemById(id);
         return ResponseEntity.ok(item);
     }
@@ -60,7 +62,7 @@ public class ItemController {
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<Page<ItemResponse>> getAllItems(Pageable pageable) {
-        controllerLogger.methodCalled("ItemController", "getAllItems");
+        controllerLogger.methodCalled(CONTROLLER, "getAllItems");
         Page<ItemResponse> items = itemService.getAllItems(pageable);
         return ResponseEntity.ok(items);
     }
@@ -69,7 +71,7 @@ public class ItemController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ItemResponse> createItem(
             @Valid @RequestBody CreateItemRequest createItemRequest) {
-        controllerLogger.methodCalled("ItemController", "createItem", createItemRequest.getName(), createItemRequest.getPrice());
+        controllerLogger.methodCalled(CONTROLLER, "createItem", createItemRequest.getName(), createItemRequest.getPrice());
         ItemResponse createdItem = itemService.createItem(createItemRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdItem);
     }
@@ -78,7 +80,7 @@ public class ItemController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ItemResponse> updateItem(
             @Valid @RequestBody UpdateItemRequest updateItemRequest) {
-        controllerLogger.methodCalled("ItemController", "updateItem", updateItemRequest.getId());
+        controllerLogger.methodCalled(CONTROLLER, "updateItem", updateItemRequest.getId());
         ItemResponse updatedItem = itemService.updateItem(updateItemRequest);
         return ResponseEntity.ok(updatedItem);
     }
@@ -86,7 +88,7 @@ public class ItemController {
     @PutMapping("/{id}/activate")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> activateItem(@PathVariable UUID id) {
-        controllerLogger.methodCalled("ItemController", "activateItem", id);
+        controllerLogger.methodCalled(CONTROLLER, "activateItem", id);
         itemService.activateItem(id);
         return ResponseEntity.noContent().build();
     }
@@ -94,7 +96,7 @@ public class ItemController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> deactivateItem(@PathVariable UUID id) {
-        controllerLogger.methodCalled("ItemController", "deactivateItem", id);
+        controllerLogger.methodCalled(CONTROLLER, "deactivateItem", id);
         itemService.deactivateItem(id);
         return ResponseEntity.noContent().build();
     }
