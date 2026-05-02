@@ -3,11 +3,17 @@ package com.javainternshiporderservice.service.impl;
 import com.javainternshiporderservice.dto.request.create.CreateOrderItemRequest;
 import com.javainternshiporderservice.dto.request.update.UpdateOrderItemRequest;
 import com.javainternshiporderservice.dto.response.OrderItemResponse;
+import com.javainternshiporderservice.exception.ItemNotFoundException;
 import com.javainternshiporderservice.exception.OrderItemNotFoundException;
+import com.javainternshiporderservice.exception.OrderNotFoundException;
 import com.javainternshiporderservice.mapper.OrderItemMapper;
+import com.javainternshiporderservice.model.Item;
+import com.javainternshiporderservice.model.Order;
 import com.javainternshiporderservice.model.OrderItem;
 import com.javainternshiporderservice.model.specification.OrderItemSpecification;
+import com.javainternshiporderservice.repository.ItemRepository;
 import com.javainternshiporderservice.repository.OrderItemRepository;
+import com.javainternshiporderservice.repository.OrderRepository;
 import com.javainternshiporderservice.service.OrderItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +22,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
@@ -23,9 +30,13 @@ import java.util.UUID;
 public class OrderItemServiceImpl implements OrderItemService {
 
     private static final String ORDER_ITEM_NOT_FOUND_MESSAGE = "OrderItem not found";
+    private static final String ORDER_NOT_FOUND_MESSAGE = "Order not found with id: ";
+    private static final String ITEM_NOT_FOUND_MESSAGE = "Item not found with id: ";
 
     private final OrderItemMapper orderItemMapper;
     private final OrderItemRepository orderItemRepository;
+    private final OrderRepository orderRepository;
+    private final ItemRepository itemRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -112,8 +123,21 @@ public class OrderItemServiceImpl implements OrderItemService {
     @Override
     @Transactional
     public OrderItemResponse createOrderItem(CreateOrderItemRequest createOrderItemRequest) {
+        Order order = orderRepository.findById(createOrderItemRequest.getOrderId())
+                .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_MESSAGE + createOrderItemRequest.getOrderId()));
+        Item item = itemRepository.findById(createOrderItemRequest.getItemId())
+                .orElseThrow(() -> new ItemNotFoundException(ITEM_NOT_FOUND_MESSAGE + createOrderItemRequest.getItemId()));
+
         OrderItem orderItem = orderItemMapper.toOrderItem(createOrderItemRequest);
-        OrderItem createdOrderItem = orderItemRepository.save(orderItem);
+        orderItem.setOrder(order);
+        orderItem.setItem(item);
+
+        OrderItem createdOrderItem = orderItemRepository.saveAndFlush(orderItem);
+        BigDecimal currentTotal = order.getTotalPrice() != null ? order.getTotalPrice() : BigDecimal.ZERO;
+        BigDecimal lineTotal = item.getPrice().multiply(BigDecimal.valueOf(createdOrderItem.getQuantity()));
+        order.setTotalPrice(currentTotal.add(lineTotal));
+        orderRepository.saveAndFlush(order);
+
         return orderItemMapper.toOrderItemResponse(createdOrderItem);
     }
 

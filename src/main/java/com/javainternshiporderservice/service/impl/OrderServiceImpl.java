@@ -199,7 +199,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItem.setItem(itemRepository.getReferenceById(itemRequests.get(i).getItemId()));
             }
         }
-        Order createdOrder = orderRepository.save(order);
+        Order createdOrder = orderRepository.saveAndFlush(order);
         return assembleWithUser(createdOrder);
     }
 

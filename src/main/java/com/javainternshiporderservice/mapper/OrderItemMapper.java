@@ -6,6 +6,8 @@ import com.javainternshiporderservice.dto.response.OrderItemResponse;
 import com.javainternshiporderservice.model.OrderItem;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.data.domain.Page;
@@ -17,7 +19,7 @@ import java.util.List;
  * MapStruct mapper for converting between OrderItem entity and DTOs.
  * Component model "spring" enables Spring dependency injection.
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface OrderItemMapper {
 
     /**
@@ -26,6 +28,11 @@ public interface OrderItemMapper {
      * @param orderItem the order item entity
      * @return the order item response DTO
      */
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "order.id", target = "orderId")
+    @Mapping(source = "item.id", target = "itemId")
+    @Mapping(source = "createdAt", target = "createdAt")
+    @Mapping(source = "updatedAt", target = "updatedAt")
     OrderItemResponse toOrderItemResponse(OrderItem orderItem);
 
     /**

@@ -13,7 +13,7 @@ import org.springframework.data.domain.PageImpl;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {OrderItemMapper.class})
 public interface OrderMapper {
 
     OrderResponse toOrderResponse(Order order);

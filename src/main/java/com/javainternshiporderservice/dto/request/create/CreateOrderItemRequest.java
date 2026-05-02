@@ -10,6 +10,9 @@ import java.util.UUID;
 public class CreateOrderItemRequest {
 
     @NotNull
+    private UUID orderId;
+
+    @NotNull
     private UUID itemId;
 
     @NotNull

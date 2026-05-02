@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: java-internship-order-service
+  labels:
+    app: java-internship-order-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: java-internship-order-service
+  template:
+    metadata:
+      labels:
+        app: java-internship-order-service
+    spec:
+      containers:
+        - name: java-internship-order-service
+          image: maxononion/javainternship-order-service:latest
+          ports:
+            - containerPort: 8083
+          env:
+            - name: SERVER_PORT
+              value: "8083"
+            - name: DB_DRIVER

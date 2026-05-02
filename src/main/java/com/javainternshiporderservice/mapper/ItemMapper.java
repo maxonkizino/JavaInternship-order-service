@@ -6,6 +6,7 @@ import com.javainternshiporderservice.dto.response.ItemResponse;
 import com.javainternshiporderservice.model.Item;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.data.domain.Page;
@@ -26,6 +27,8 @@ public interface ItemMapper {
      * @param item the item entity
      * @return the item response DTO
      */
+    @Mapping(source = "createdAt", target = "createdAt")
+    @Mapping(source = "updatedAt", target = "updatedAt")
     ItemResponse toItemResponse(Item item);
 
     /**
